@@ -1,0 +1,110 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "cellworld:cellular",
+        "biome_source": {
+          "type": "cellworld:cellular",
+          "cell_map": {
+            "cell_size": [
+              64,
+              16
+            ],
+            "cells": {
+              "cells": [
+                {
+                  "cells": [
+                    {
+                      "cells": {
+                        "biome": "minecraft:frozen_ocean",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    },
+                    {
+                      "cells": {
+                        "biome": "minecraft:cold_ocean",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    },
+                    {
+                      "cells": {
+                        "biome": "minecraft:ocean",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    },
+                    {
+                      "cells": {
+                        "biome": "minecraft:lukewarm_ocean",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    },
+                    {
+                      "cells": {
+                        "biome": "minecraft:warm_ocean",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "cells": {
+                        "biome": "minecraft:dark_forest",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    },
+                    {
+                      "cells": {
+                        "biome": "minecraft:plains",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    },
+                    {
+                      "cells": {
+                        "biome": "minecraft:flower_forest",
+                        "factor": 0.0,
+                        "offset": 0.0
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "settings": {
+          "biome": "minecraft:plains",
+          "features": false,
+          "lakes": false,
+          "layers": [
+            {
+              "block": "minecraft:bedrock",
+              "height": 1
+            },
+            {
+              "block": "minecraft:dirt",
+              "height": 2
+            },
+            {
+              "block": "minecraft:grass_block",
+              "height": 1
+            }
+          ],
+          "structure_overrides": [
+            "minecraft:strongholds",
+            "minecraft:villages"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,11 +1,11 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.cells;
 
+import com.flashfyre.cellworld.Cell;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.biome.Biomes;
 
 import java.util.ArrayList;
 import java.util.List;

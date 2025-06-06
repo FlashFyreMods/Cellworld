@@ -1,5 +1,7 @@
 package com.flashfyre.cellworld;
 
+import com.flashfyre.cellworld.cells.CellEntry;
+import com.flashfyre.cellworld.cells.CellMap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;

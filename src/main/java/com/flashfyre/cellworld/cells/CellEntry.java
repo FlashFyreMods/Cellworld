@@ -1,5 +1,6 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.cells;
 
+import com.flashfyre.cellworld.Cell;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -10,7 +11,7 @@ public record CellEntry(Either<Cell, List<CellEntry>> value) {
     public static final Codec<CellEntry> CODEC = Codec.recursive(
             CellEntry.class.getSimpleName(), // This is for the toString method
             recursedCodec -> RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.either(Cell.CODEC, Codec.list(recursedCodec)).fieldOf("cells").forGetter(CellEntry::value)
+                    Codec.either(Cell.CODEC, Codec.list(recursedCodec)).fieldOf("value").forGetter(CellEntry::value)
             ).apply(instance, CellEntry::new))
     );
 

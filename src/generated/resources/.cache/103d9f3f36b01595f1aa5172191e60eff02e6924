@@ -1,2 +1,5 @@
-// 1.21.1	2025-06-04T03:04:16.4232455	Registries
-b332b14419f47775e2a62b24ec0a26b5aaed9752 data/cellworld/worldgen/world_preset/cellular.json
+// 1.21.1	2025-06-07T04:44:03.2330228	Registries
+148fd5e88fb74afb3ba0957287583ef595665d59 data/cellworld/cellworld/weighted_cell_entry/basalt_deltas.json
+191c04b3933b419fcf2d25128d831945bc5677a8 data/cellworld/cellworld/weighted_cell_entry/crimson_forest.json
+1a53440099b7b8aca4c19fae497552b01dc066d1 data/cellworld/worldgen/world_preset/cellular.json
+3b82b7a6be581a7ecbd526b975b9566cd954d4d0 data/cellworld/worldgen/world_preset/cellular_nether.json

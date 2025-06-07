@@ -1,17 +1,19 @@
 package com.flashfyre.cellworld;
 
-import com.flashfyre.cellworld.cells.CellSelector;
-import com.flashfyre.cellworld.cells.SelectorType;
-import com.flashfyre.cellworld.cells.RandomFromList;
+import com.flashfyre.cellworld.cells.*;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.*;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Mod(Cellworld.MOD_ID)
@@ -34,15 +37,21 @@ public class Cellworld {
     public static final DeferredHolder<MapCodec<? extends BiomeSource>, MapCodec<CellularBiomeSource>> CELLULAR = BIOME_SOURCES.register("cellular", () -> CellularBiomeSource.CODEC);
     public static final DeferredHolder<MapCodec<? extends ChunkGenerator>, MapCodec<BetterFlatLevelSource>> BETTER_FLAT = CHUNK_GENERATORS.register("cellular", () -> BetterFlatLevelSource.CODEC);
 
-    public static final ResourceKey<Registry<SelectorType<? extends CellSelector>>> SELECTOR_TYPE_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "cell_entry_picker_types"));
-    public static final Registry<SelectorType<? extends CellSelector>> SELECTOR_TYPE_REGISTRY = new RegistryBuilder<>(SELECTOR_TYPE_REGISTRY_KEY).create();
+    public static final ResourceKey<Registry<MapCodec<? extends CellSelector>>> SELECTOR_TYPE_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "cell_entry_picker_types"));
+    public static final Registry<MapCodec<? extends CellSelector>> SELECTOR_TYPE_REGISTRY = new RegistryBuilder<>(SELECTOR_TYPE_REGISTRY_KEY).create();
+
+    public static final ResourceKey<Registry<RandomFromWeightedList.WeightedCellEntry>> WEIGHTED_CELL_ENTRY_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "weighted_cell_entry"));
+    //public static final Registry<RandomFromWeightedList.WeightedCellEntry> WEIGHTED_CELL_ENTRY_REGISTRY = new RegistryBuilder<>(WEIGHTED_CELL_ENTRY_REGISTRY_KEY).create();
 
 
-    public static final DeferredRegister<SelectorType<? extends CellSelector>> SELECTOR_TYPES = DeferredRegister.create(SELECTOR_TYPE_REGISTRY, MOD_ID);
-    public static final DeferredHolder<SelectorType<? extends CellSelector>, SelectorType<RandomFromList>> RANDOM_FROM_LIST = SELECTOR_TYPES.register("random_from_list", () -> RandomFromList.CODEC);
+    public static final DeferredRegister<MapCodec<? extends CellSelector>> SELECTOR_TYPES = DeferredRegister.create(SELECTOR_TYPE_REGISTRY, MOD_ID);
+    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM_FROM_LIST = SELECTOR_TYPES.register("random_from_list", () -> RandomFromList.CODEC);
+    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM_FROM_WEIGHTED_LIST = SELECTOR_TYPES.register("random_from_weighted_list", () -> RandomFromWeightedList.CODEC);
+    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM_FROM_WEIGHTED_LIST_HOLDERSET = SELECTOR_TYPES.register("random_from_weighted_list_holderset", () -> RandomFromWeightedListHolderSet.CODEC);
 
     public Cellworld(IEventBus modBus, ModContainer container) {
         modBus.addListener(this::registerRegistries);
+        modBus.addListener(this::registerDatapackRegistries);
         modBus.addListener(this::gatherData);
         BIOME_SOURCES.register(modBus);
         CHUNK_GENERATORS.register(modBus);
@@ -51,12 +60,42 @@ public class Cellworld {
 
     public void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
-        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         PackOutput packOutput = generator.getPackOutput();
-        generator.addProvider(event.includeClient(), new CellworldDataProvider(packOutput, lookupProvider));
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+        ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
+        generator.addProvider(
+                event.includeServer(),
+                (DataProvider.Factory<DatapackBuiltinEntriesProvider>) output -> new DatapackBuiltinEntriesProvider(
+                        output,
+                        lookupProvider,
+                        new RegistrySetBuilder()
+                                .add(Registries.WORLD_PRESET, CellworldWorldPresets::bootstrap)
+                                .add(Cellworld.WEIGHTED_CELL_ENTRY_REGISTRY_KEY, RandomFromWeightedList::bootstrap),
+                        Set.of(MOD_ID)
+                )
+        );
+        // other providers here
+        /*generator.addProvider(
+                event.includeServer(),
+                new WeightedCellEntryTagProvider(packOutput, lookupProvider, existingFileHelper)
+        );*/
     }
 
     public void registerRegistries(NewRegistryEvent event) {
         event.register(SELECTOR_TYPE_REGISTRY);
+    }
+
+    /*public static final DeferredRegister<RuleTestType<?>> RULE_TEST_TYPES = DeferredRegister.create(Registries.RULE_TEST, Cellworld.MOD_ID);
+
+    private static <P extends RuleTest> DeferredHolder<RuleTestType<?>, RuleTestType<P>> register(String name, MapCodec<P> codec) {
+        return RULE_TEST_TYPES.register(name, () -> () -> codec);
+    }*/
+
+    public void registerDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
+        event.dataPackRegistry(
+                WEIGHTED_CELL_ENTRY_REGISTRY_KEY,
+                RandomFromWeightedList.WeightedCellEntry.DIRECT_CODEC,
+                null
+        );
     }
 }

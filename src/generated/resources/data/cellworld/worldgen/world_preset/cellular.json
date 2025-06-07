@@ -14,70 +14,61 @@
             "cells": {
               "cells": [
                 {
-                  "cells": [
-                    {
-                      "cells": {
-                        "biome": "minecraft:frozen_ocean",
-                        "factor": 0.0,
-                        "offset": 0.0
+                  "value": {
+                    "cells": [
+                      {
+                        "value": {
+                          "biome": "minecraft:frozen_ocean"
+                        }
+                      },
+                      {
+                        "value": {
+                          "biome": "minecraft:cold_ocean"
+                        }
+                      },
+                      {
+                        "value": {
+                          "biome": "minecraft:ocean"
+                        }
+                      },
+                      {
+                        "value": {
+                          "biome": "minecraft:lukewarm_ocean"
+                        }
+                      },
+                      {
+                        "value": {
+                          "biome": "minecraft:warm_ocean"
+                        }
                       }
-                    },
-                    {
-                      "cells": {
-                        "biome": "minecraft:cold_ocean",
-                        "factor": 0.0,
-                        "offset": 0.0
-                      }
-                    },
-                    {
-                      "cells": {
-                        "biome": "minecraft:ocean",
-                        "factor": 0.0,
-                        "offset": 0.0
-                      }
-                    },
-                    {
-                      "cells": {
-                        "biome": "minecraft:lukewarm_ocean",
-                        "factor": 0.0,
-                        "offset": 0.0
-                      }
-                    },
-                    {
-                      "cells": {
-                        "biome": "minecraft:warm_ocean",
-                        "factor": 0.0,
-                        "offset": 0.0
-                      }
-                    }
-                  ]
+                    ],
+                    "selector_type": "cellworld:random_from_list"
+                  }
                 },
                 {
-                  "cells": [
-                    {
-                      "cells": {
-                        "biome": "minecraft:dark_forest",
-                        "factor": 0.0,
-                        "offset": 0.0
+                  "value": {
+                    "cells": [
+                      {
+                        "value": {
+                          "biome": "minecraft:dark_forest"
+                        }
+                      },
+                      {
+                        "value": {
+                          "biome": "minecraft:plains"
+                        }
+                      },
+                      {
+                        "value": {
+                          "biome": "minecraft:flower_forest"
+                        }
                       }
-                    },
-                    {
-                      "cells": {
-                        "biome": "minecraft:plains",
-                        "factor": 0.0,
-                        "offset": 0.0
-                      }
-                    },
-                    {
-                      "cells": {
-                        "biome": "minecraft:flower_forest",
-                        "factor": 0.0,
-                        "offset": 0.0
-                      }
-                    }
-                  ]
+                    ],
+                    "selector_type": "cellworld:random_from_list"
+                  }
                 }
-              ]
+              ],
+              "selector_type": "cellworld:random_from_list"
             }
           }
         },

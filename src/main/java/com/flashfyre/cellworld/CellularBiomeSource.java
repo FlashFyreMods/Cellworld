@@ -2,6 +2,7 @@ package com.flashfyre.cellworld;
 
 import com.flashfyre.cellworld.cells.CellEntry;
 import com.flashfyre.cellworld.cells.CellMap;
+import com.flashfyre.cellworld.cells.CellSelector;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
@@ -30,14 +31,18 @@ public class CellularBiomeSource extends BiomeSource {
 
     @Override
     protected Stream<Holder<Biome>> collectPossibleBiomes() {
-        return flatten(this.cellMap.cells().value());
+        return flatten(this.cellMap.cells());
     }
 
-    public static Stream<Holder<Biome>> flatten(Either<Cell, List<CellEntry>> either) {
+    public static Stream<Holder<Biome>> flatten(CellSelector cells) {
+        return cells.all().flatMap(entry -> CellularBiomeSource.flatten(entry.value()));
+    }
+
+    public static Stream<Holder<Biome>> flatten(Either<Cell, CellSelector> either) {
         if (either.left().isPresent()) {
             return Stream.of(either.left().orElseThrow().biome());
         } else {
-            return either.right().orElseThrow().stream().flatMap(entry -> flatten(entry.value()));
+            return either.right().orElseThrow().all().flatMap(entry -> flatten(entry.value()));
         }
     }
 

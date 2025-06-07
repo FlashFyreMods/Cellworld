@@ -1,0 +1,52 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "minecraft:flat",
+        "settings": {
+          "biome": "minecraft:plains",
+          "features": false,
+          "lakes": false,
+          "layers": [
+            {
+              "block": "minecraft:bedrock",
+              "height": 1
+            },
+            {
+              "block": "minecraft:dirt",
+              "height": 2
+            },
+            {
+              "block": "minecraft:grass_block",
+              "height": 1
+            }
+          ],
+          "structure_overrides": [
+            "minecraft:strongholds",
+            "minecraft:villages"
+          ]
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "cellworld:cellular",
+          "cell_map": {
+            "cell_size": [
+              32
+            ],
+            "cells": {
+              "cells": "#cellworld:nether",
+              "selector_type": "cellworld:random_from_weighted_list_holderset"
+            }
+          }
+        },
+        "settings": "minecraft:nether"
+      }
+    }
+  }
+}

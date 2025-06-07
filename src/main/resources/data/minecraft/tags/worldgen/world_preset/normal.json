@@ -1,5 +1,6 @@
 {
   "values": [
-	"cellworld:cellular"
+	"cellworld:cellular",
+    "cellworld:cellular_nether"
   ]
 }

@@ -6,17 +6,19 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public record CellMap(List<Integer> layerScales, CellEntry cells) {
+public record CellMap(List<Integer> layerScales, CellSelector cells) {
 
     public static final Codec<CellMap> CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
                     Codec.list(Codec.INT).fieldOf("cell_size").forGetter(cellMap -> cellMap.layerScales),
-                    CellEntry.CODEC.fieldOf("cells").forGetter(cellMap -> cellMap.cells)
+                    CellSelector.CODEC.fieldOf("cells").forGetter(cellMap -> cellMap.cells)
             ).apply(inst, CellMap::new)
     );
 
@@ -27,14 +29,15 @@ public record CellMap(List<Integer> layerScales, CellEntry cells) {
             nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.get(i)); // Gets the small followed by big cells
             nucleiPositions.add(nucleusPos);
         }
-        Either<Cell, List<CellEntry>> current = cells.value();
+        Either<Cell, CellSelector> current = Either.right(this.cells);
         int cellIndex = nucleiPositions.size()-1;
-        Random r = new Random();
+        RandomSource r = new LegacyRandomSource(0);
         while (current.right().isPresent()) {
-            List<CellEntry> currentCells = current.right().orElseThrow();
+            CellSelector currentCells = current.right().orElseThrow();
             BlockPos currentNucleiPos = nucleiPositions.get(cellIndex);
             r.setSeed(BlockPos.asLong(currentNucleiPos.getX(), 0, currentNucleiPos.getZ()));
-            current = currentCells.get(r.nextInt(currentCells.size())).value();
+
+            current = currentCells.get(r).value();;
             cellIndex--;
         }
 

@@ -6,7 +6,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.SimpleWeightedRandomList;
 
+import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public class RandomFromWeightedListHolderSet extends CellSelector {
@@ -18,6 +20,7 @@ public class RandomFromWeightedListHolderSet extends CellSelector {
     );
 
     private final HolderSet<RandomFromWeightedList.WeightedCellEntry> cells;
+    private SimpleWeightedRandomList<CellEntry> list;
 
     public RandomFromWeightedListHolderSet(HolderSet<RandomFromWeightedList.WeightedCellEntry> cells) {
         this.cells = cells;
@@ -25,7 +28,8 @@ public class RandomFromWeightedListHolderSet extends CellSelector {
 
     @Override
     public CellEntry get(RandomSource r) {
-        return this.cells.getRandomElement(r).orElseThrow().value().cell();
+        //return this.cells.getRandomElement(r).orElseThrow().value().cell();
+        return this.list.getRandomValue(r).orElseThrow();
     }
 
     @Override
@@ -36,5 +40,13 @@ public class RandomFromWeightedListHolderSet extends CellSelector {
     @Override
     public Stream<CellEntry> all() {
         return this.cells.stream().map(e -> e.value().cell());
+    }
+
+    public void buildList() {
+        SimpleWeightedRandomList.Builder<CellEntry> builder = new SimpleWeightedRandomList.Builder<>();
+        this.cells.forEach(h -> {
+            builder.add(h.value().cell(), h.value().weight());
+        });
+        this.list = builder.build();
     }
 }

@@ -1,7 +1,10 @@
 {
   "values": [
-    "cellworld:basalt_deltas",
+    "cellworld:nether_wastes",
+    "cellworld:soul_sand_valley",
 	"cellworld:warped_forest",
-    "cellworld:crimson_forest"
+    "cellworld:crimson_forest",
+    "cellworld:basalt_deltas",
+    "cellworld:gilded_depths"
   ]
 }

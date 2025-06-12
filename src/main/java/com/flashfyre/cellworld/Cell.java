@@ -18,19 +18,19 @@ import java.util.Optional;
 public class Cell {
 
     private final Holder<Biome> biome;
-    private final Optional<SurfaceRules.RuleSource> surfaceRules;
+    private final Optional<SurfaceRules.RuleSource> ruleSource;
 
     public static final Codec<Cell> CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
                             Biome.CODEC.fieldOf("biome").forGetter(cell -> cell.biome),
-                            SurfaceRules.RuleSource.CODEC.optionalFieldOf("surface_rules").forGetter(cell -> cell.surfaceRules)
+                            SurfaceRules.RuleSource.CODEC.optionalFieldOf("surface_rules").forGetter(cell -> cell.ruleSource)
                     )
                     .apply(inst, Cell::new)
     );
 
-    private Cell(Holder<Biome> biome, Optional<SurfaceRules.RuleSource> surfaceRules) {
+    private Cell(Holder<Biome> biome, Optional<SurfaceRules.RuleSource> ruleSource) {
         this.biome = biome;
-        this.surfaceRules = surfaceRules;
+        this.ruleSource = ruleSource;
     }
 
     private Cell(Holder<Biome> biome) {
@@ -41,5 +41,11 @@ public class Cell {
         return new Cell(biomeGetter.getOrThrow(biome), Optional.empty());
     }
 
+    public static Cell of(HolderGetter<Biome> biomeGetter, ResourceKey<Biome> biome, SurfaceRules.RuleSource ruleSource) {
+        return new Cell(biomeGetter.getOrThrow(biome), Optional.of(ruleSource));
+    }
+
     public Holder<Biome> biome() { return this.biome; }
+
+    public Optional<SurfaceRules.RuleSource> ruleSource() { return this.ruleSource; }
 }

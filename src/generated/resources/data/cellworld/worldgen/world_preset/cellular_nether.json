@@ -35,15 +35,7 @@
         "type": "minecraft:noise",
         "biome_source": {
           "type": "cellworld:cellular",
-          "cell_map": {
-            "cell_size": [
-              32
-            ],
-            "cells": {
-              "cells": "#cellworld:nether",
-              "selector_type": "cellworld:random_from_weighted_list_holderset"
-            }
-          }
+          "cell_map": "cellworld:nether"
         },
         "settings": "minecraft:nether"
       }

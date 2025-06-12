@@ -8,7 +8,6 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public class RandomFromWeightedListHolderSet extends CellSelector {
@@ -19,16 +18,15 @@ public class RandomFromWeightedListHolderSet extends CellSelector {
                     .apply(inst, RandomFromWeightedListHolderSet::new)
     );
 
-    private final HolderSet<RandomFromWeightedList.WeightedCellEntry> cells;
+    private final HolderSet<WeightedCell> cells;
     private SimpleWeightedRandomList<CellEntry> list;
 
-    public RandomFromWeightedListHolderSet(HolderSet<RandomFromWeightedList.WeightedCellEntry> cells) {
+    public RandomFromWeightedListHolderSet(HolderSet<WeightedCell> cells) {
         this.cells = cells;
     }
 
     @Override
     public CellEntry get(RandomSource r) {
-        //return this.cells.getRandomElement(r).orElseThrow().value().cell();
         return this.list.getRandomValue(r).orElseThrow();
     }
 

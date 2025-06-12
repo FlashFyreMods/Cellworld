@@ -1,12 +1,21 @@
 package com.flashfyre.cellworld.cells;
 
 import com.flashfyre.cellworld.Cell;
+import com.flashfyre.cellworld.Cellworld;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 
 import java.util.ArrayList;
@@ -15,12 +24,14 @@ import java.util.Random;
 
 public record CellMap(List<Integer> layerScales, CellSelector cells) {
 
-    public static final Codec<CellMap> CODEC = RecordCodecBuilder.create(
+    public static final Codec<CellMap> DIRECT_CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
                     Codec.list(Codec.INT).fieldOf("cell_size").forGetter(cellMap -> cellMap.layerScales),
                     CellSelector.CODEC.fieldOf("cells").forGetter(cellMap -> cellMap.cells)
             ).apply(inst, CellMap::new)
     );
+
+    public static final Codec<Holder<CellMap>> CODEC = RegistryFileCodec.create(Cellworld.CELL_MAP_REGISTRY_KEY, DIRECT_CODEC);
 
     public Cell getCell(int x, int z) {
         BlockPos nucleusPos = new BlockPos(x, 0, z);
@@ -73,5 +84,18 @@ public record CellMap(List<Integer> layerScales, CellSelector cells) {
             }
         }
         return closestCellCentrePos.immutable();
+    }
+
+    public static final ResourceKey<CellMap> NETHER = createKey("nether");
+
+    public static void bootstrap(BootstrapContext<CellMap> ctx) {
+        HolderGetter<Biome> biomes = ctx.lookup(Registries.BIOME);
+        HolderGetter<WeightedCell> weightedCellEntries = ctx.lookup(Cellworld.WEIGHTED_CELL_ENTRY_REGISTRY_KEY);
+        ctx.register(NETHER, new CellMap(List.of(64), new RandomFromWeightedListHolderSet(weightedCellEntries.getOrThrow(WeightedCell.NETHER))));
+    }
+
+
+    private static ResourceKey<CellMap> createKey(String name) {
+        return ResourceKey.create(Cellworld.CELL_MAP_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(Cellworld.MOD_ID, name));
     }
 }

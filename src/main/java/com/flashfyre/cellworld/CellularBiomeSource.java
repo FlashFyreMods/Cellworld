@@ -17,9 +17,9 @@ public class CellularBiomeSource extends BiomeSource {
             .xmap(CellularBiomeSource::new, s -> s.cellMap);
 
 
-    private final CellMap cellMap;
+    private final Holder<CellMap> cellMap;
 
-    public CellularBiomeSource(CellMap cellMap) {
+    public CellularBiomeSource(Holder<CellMap> cellMap) {
         this.cellMap = cellMap;
     }
 
@@ -30,7 +30,7 @@ public class CellularBiomeSource extends BiomeSource {
 
     @Override
     protected @NotNull Stream<Holder<Biome>> collectPossibleBiomes() {
-        return flattenSelector(this.cellMap.cells());
+        return flattenSelector(this.cellMap.value().cells());
     }
 
     public static Stream<Holder<Biome>> flattenSelector(CellSelector selector) {
@@ -50,6 +50,6 @@ public class CellularBiomeSource extends BiomeSource {
 
     @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler sampler) {
-        return this.cellMap.getCell(x, z).biome();
+        return this.cellMap.value().getCell(x<<2, z<<2).biome();
     }
 }

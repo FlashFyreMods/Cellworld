@@ -3,98 +3,12 @@
     "minecraft:overworld": {
       "type": "minecraft:overworld",
       "generator": {
-        "type": "cellworld:cellular",
+        "type": "minecraft:noise",
         "biome_source": {
           "type": "cellworld:cellular",
-          "cell_map": {
-            "cell_size": [
-              64,
-              16
-            ],
-            "cells": {
-              "cells": [
-                {
-                  "value": {
-                    "cells": [
-                      {
-                        "value": {
-                          "biome": "minecraft:frozen_ocean"
-                        }
-                      },
-                      {
-                        "value": {
-                          "biome": "minecraft:cold_ocean"
-                        }
-                      },
-                      {
-                        "value": {
-                          "biome": "minecraft:ocean"
-                        }
-                      },
-                      {
-                        "value": {
-                          "biome": "minecraft:lukewarm_ocean"
-                        }
-                      },
-                      {
-                        "value": {
-                          "biome": "minecraft:warm_ocean"
-                        }
-                      }
-                    ],
-                    "selector_type": "cellworld:random_from_list"
-                  }
-                },
-                {
-                  "value": {
-                    "cells": [
-                      {
-                        "value": {
-                          "biome": "minecraft:dark_forest"
-                        }
-                      },
-                      {
-                        "value": {
-                          "biome": "minecraft:plains"
-                        }
-                      },
-                      {
-                        "value": {
-                          "biome": "minecraft:flower_forest"
-                        }
-                      }
-                    ],
-                    "selector_type": "cellworld:random_from_list"
-                  }
-                }
-              ],
-              "selector_type": "cellworld:random_from_list"
-            }
-          }
+          "cell_map": "cellworld:nether"
         },
-        "settings": {
-          "biome": "minecraft:plains",
-          "features": false,
-          "lakes": false,
-          "layers": [
-            {
-              "block": "minecraft:bedrock",
-              "height": 1
-            },
-            {
-              "block": "minecraft:dirt",
-              "height": 2
-            },
-            {
-              "block": "minecraft:grass_block",
-              "height": 1
-            }
-          ],
-          "structure_overrides": [
-            "minecraft:strongholds",
-            "minecraft:villages"
-          ]
-        }
+        "settings": "cellworld:flat"
       }
     }
   }

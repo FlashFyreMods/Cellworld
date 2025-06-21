@@ -1,14 +1,4 @@
 {
-  "cell": {
-    "value": {
-      "biome": "cellworld:gilded_depths",
-      "surface_rules": {
-        "type": "minecraft:block",
-        "result_state": {
-          "Name": "minecraft:blackstone"
-        }
-      }
-    }
-  },
-  "weight": 50
+  "cell": "cellworld:gilded_depths",
+  "weight": 80
 }

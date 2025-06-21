@@ -1,15 +1,17 @@
 package com.flashfyre.cellworld;
 
 import com.flashfyre.cellworld.cells.*;
+import com.flashfyre.cellworld.cells.selector.CellSelectionSet;
+import com.flashfyre.cellworld.cells.selector.WeightedRandomSelectionSet;
+import com.flashfyre.cellworld.chunkgenerator.BetterFlatLevelSource;
+import com.flashfyre.cellworld.registry.*;
+import com.flashfyre.cellworld.levelgen.CellMapRuleSource;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.SurfaceRules;
@@ -42,18 +44,10 @@ public class Cellworld {
     public static final DeferredRegister<MapCodec<? extends SurfaceRules.RuleSource>> MATERIAL_RULES = DeferredRegister.create(Registries.MATERIAL_RULE, Cellworld.MOD_ID);
     public static final DeferredHolder<MapCodec<? extends SurfaceRules.RuleSource>, MapCodec<CellMapRuleSource>> CELL_MAP_RULE = MATERIAL_RULES.register("cell_map", () -> CellMapRuleSource.MAP_CODEC);
 
-    public static final ResourceKey<Registry<MapCodec<? extends CellSelector>>> SELECTOR_TYPE_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "cell_entry_picker_types"));
-    public static final Registry<MapCodec<? extends CellSelector>> SELECTOR_TYPE_REGISTRY = new RegistryBuilder<>(SELECTOR_TYPE_REGISTRY_KEY).create();
-
-    public static final ResourceKey<Registry<WeightedCell>> WEIGHTED_CELL_ENTRY_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "weighted_cell_entry"));
-    public static final ResourceKey<Registry<CellMap>> CELL_MAP_REGISTRY_KEY = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MOD_ID, "cell_map"));
-    //public static final Registry<RandomFromWeightedList.WeightedCellEntry> WEIGHTED_CELL_ENTRY_REGISTRY = new RegistryBuilder<>(WEIGHTED_CELL_ENTRY_REGISTRY_KEY).create();
-
-
-    public static final DeferredRegister<MapCodec<? extends CellSelector>> SELECTOR_TYPES = DeferredRegister.create(SELECTOR_TYPE_REGISTRY, MOD_ID);
-    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM_FROM_LIST = SELECTOR_TYPES.register("random_from_list", () -> RandomFromList.CODEC);
-    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM_FROM_WEIGHTED_LIST = SELECTOR_TYPES.register("random_from_weighted_list", () -> RandomFromWeightedList.CODEC);
-    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM_FROM_WEIGHTED_LIST_HOLDERSET = SELECTOR_TYPES.register("random_from_weighted_list_holderset", () -> RandomFromWeightedListHolderSet.CODEC);
+    public static final DeferredRegister<MapCodec<? extends CellSelectionSet>> SELECTOR_TYPES = DeferredRegister.create(CellworldRegistries.SELECTOR_TYPE_REGISTRY_KEY, MOD_ID);
+    //public static final DeferredHolder<MapCodec<? extends CellSelectionSet>,MapCodec<? extends CellSelectionSet>> RANDOM_FROM_LIST = SELECTOR_TYPES.register("random_from_list", () -> RandomFromList.CODEC);
+    //public static final DeferredHolder<MapCodec<? extends CellSelectionSet>,MapCodec<? extends CellSelectionSet>> RANDOM_FROM_WEIGHTED_LIST = SELECTOR_TYPES.register("random_from_weighted_list", () -> RandomFromWeightedList.CODEC);
+    public static final DeferredHolder<MapCodec<? extends CellSelectionSet>,MapCodec<? extends CellSelectionSet>> WEIGHTED_RANDOM = SELECTOR_TYPES.register("weighted_random", () -> WeightedRandomSelectionSet.CODEC);
 
     public Cellworld(IEventBus modBus, ModContainer container) {
         modBus.addListener(this::registerRegistries);
@@ -79,8 +73,9 @@ public class Cellworld {
                                 .add(Registries.NOISE_SETTINGS, CellworldNoiseSettings::bootstrap)
                                 .add(Registries.WORLD_PRESET, CellworldWorldPresets::bootstrap)
                                 .add(Registries.BIOME, CellworldBiomes::bootstrap)
-                                .add(Cellworld.WEIGHTED_CELL_ENTRY_REGISTRY_KEY, WeightedCell::bootstrap)
-                                .add(Cellworld.CELL_MAP_REGISTRY_KEY, CellMap::bootstrap),
+                                .add(CellworldRegistries.CELL_REGISTRY_KEY, CellworldCells::bootstrap)
+                                .add(CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY, WeightedCell::bootstrap)
+                                .add(CellworldRegistries.CELL_MAP_REGISTRY_KEY, CellMap::bootstrap),
                         Set.of(MOD_ID)
                 )
         );
@@ -92,7 +87,7 @@ public class Cellworld {
     }
 
     public void registerRegistries(NewRegistryEvent event) {
-        event.register(SELECTOR_TYPE_REGISTRY);
+        event.register(CellworldRegistries.SELECTOR_TYPE_REGISTRY);
     }
 
     /*public static final DeferredRegister<RuleTestType<?>> RULE_TEST_TYPES = DeferredRegister.create(Registries.RULE_TEST, Cellworld.MOD_ID);
@@ -103,12 +98,17 @@ public class Cellworld {
 
     public void registerDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
         event.dataPackRegistry(
-                WEIGHTED_CELL_ENTRY_REGISTRY_KEY,
+                CellworldRegistries.CELL_REGISTRY_KEY,
+                Cell.DIRECT_CODEC,
+                null
+        );
+        event.dataPackRegistry(
+                CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY,
                 WeightedCell.DIRECT_CODEC,
                 null
         );
         event.dataPackRegistry(
-                CELL_MAP_REGISTRY_KEY,
+                CellworldRegistries.CELL_MAP_REGISTRY_KEY,
                 CellMap.DIRECT_CODEC,
                 null
         );

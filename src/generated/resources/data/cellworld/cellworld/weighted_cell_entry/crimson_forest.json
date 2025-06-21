@@ -1,8 +1,4 @@
 {
-  "cell": {
-    "value": {
-      "biome": "minecraft:crimson_forest"
-    }
-  },
-  "weight": 50
+  "cell": "cellworld:crimson_forest",
+  "weight": 90
 }

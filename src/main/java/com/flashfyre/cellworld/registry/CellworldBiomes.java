@@ -1,14 +1,11 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.registry;
 
+import com.flashfyre.cellworld.Cellworld;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.Carvers;
-import net.minecraft.data.worldgen.biome.EndBiomes;
-import net.minecraft.data.worldgen.biome.NetherBiomes;
-import net.minecraft.data.worldgen.biome.OverworldBiomes;
 import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
 import net.minecraft.data.worldgen.placement.NetherPlacements;
 import net.minecraft.data.worldgen.placement.OrePlacements;
@@ -24,7 +21,6 @@ import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class CellworldBiomes {
 
@@ -67,7 +63,7 @@ public class CellworldBiomes {
                         new BiomeSpecialEffects.Builder()
                                 .waterColor(4159204)
                                 .waterFogColor(329011)
-                                .fogColor(3344392)
+                                .fogColor(3354158)
                                 .skyColor(calculateSkyColor(2.0F))
                                 .ambientLoopSound(SoundEvents.AMBIENT_NETHER_WASTES_LOOP)
                                 .ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_NETHER_WASTES_MOOD, 6000, 8, 2.0))

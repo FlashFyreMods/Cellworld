@@ -1,5 +1,8 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.registry;
 
+import com.flashfyre.cellworld.chunkgenerator.BetterFlatLevelSource;
+import com.flashfyre.cellworld.CellularBiomeSource;
+import com.flashfyre.cellworld.Cellworld;
 import com.flashfyre.cellworld.cells.*;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
@@ -29,8 +32,8 @@ public class CellworldWorldPresets {
     public static void bootstrap(BootstrapContext<WorldPreset> ctx) {
         HolderGetter<Biome> biomes = ctx.lookup(Registries.BIOME);
         HolderGetter<NoiseGeneratorSettings> noiseSettingsGetter = ctx.lookup(Registries.NOISE_SETTINGS);
-        HolderGetter<WeightedCell> weightedCellEntries = ctx.lookup(Cellworld.WEIGHTED_CELL_ENTRY_REGISTRY_KEY);
-        HolderGetter<CellMap> cellMaps = ctx.lookup(Cellworld.CELL_MAP_REGISTRY_KEY);
+        HolderGetter<WeightedCell> weightedCellEntries = ctx.lookup(CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY);
+        HolderGetter<CellMap> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
 
         BiomeSource fixed = new FixedBiomeSource(biomes.getOrThrow(Biomes.MUSHROOM_FIELDS));
         /*BiomeSource cellularOverworld = new CellularBiomeSource(new CellMap(List.of(64, 16),

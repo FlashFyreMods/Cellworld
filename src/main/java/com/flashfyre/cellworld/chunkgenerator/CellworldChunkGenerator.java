@@ -1,4 +1,4 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.chunkgenerator;
 
 import com.flashfyre.cellworld.cells.CellMap;
 import net.minecraft.core.Holder;

@@ -1,7 +1,7 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.cells;
 
-import com.flashfyre.cellworld.cells.RandomFromWeightedList;
-import com.flashfyre.cellworld.cells.WeightedCell;
+import com.flashfyre.cellworld.Cellworld;
+import com.flashfyre.cellworld.registry.CellworldRegistries;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class WeightedCellEntryTagProvider extends TagsProvider<WeightedCell>{
     public WeightedCellEntryTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, Cellworld.WEIGHTED_CELL_ENTRY_REGISTRY_KEY, lookupProvider, Cellworld.MOD_ID, existingFileHelper);
+        super(output, CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY, lookupProvider, Cellworld.MOD_ID, existingFileHelper);
     }
 
     @Override

@@ -1,5 +1,6 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.levelgen;
 
+import com.flashfyre.cellworld.cells.Cell;
 import com.flashfyre.cellworld.cells.CellMap;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -9,10 +10,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-
 public record CellMapRuleSource(Holder<CellMap> cellMap) implements SurfaceRules.RuleSource {
-    static final MapCodec<CellMapRuleSource> MAP_CODEC =
+    public static final MapCodec<CellMapRuleSource> MAP_CODEC =
             RecordCodecBuilder.mapCodec(
                     inst -> inst.group(
                                     CellMap.CODEC.fieldOf("cell_map").forGetter(CellMapRuleSource::cellMap)

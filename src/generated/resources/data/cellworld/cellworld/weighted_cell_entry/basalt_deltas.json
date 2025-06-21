@@ -1,8 +1,4 @@
 {
-  "cell": {
-    "value": {
-      "biome": "minecraft:basalt_deltas"
-    }
-  },
-  "weight": 100
+  "cell": "cellworld:basalt_deltas",
+  "weight": 90
 }

@@ -1,36 +1,34 @@
-package com.flashfyre.cellworld;
+package com.flashfyre.cellworld.cells;
 
+import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.SurfaceRules;
-import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 
 import java.util.Optional;
 
 public class Cell {
-
     private final Holder<Biome> biome;
-    private final Optional<SurfaceRules.RuleSource> ruleSource;
+    private final Optional<SurfaceRules.RuleSource> opt;
 
-    public static final Codec<Cell> CODEC = RecordCodecBuilder.create(
+    public static final Codec<Cell> DIRECT_CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
                             Biome.CODEC.fieldOf("biome").forGetter(cell -> cell.biome),
-                            SurfaceRules.RuleSource.CODEC.optionalFieldOf("surface_rules").forGetter(cell -> cell.ruleSource)
+                            SurfaceRules.RuleSource.CODEC.optionalFieldOf("surface_rules").forGetter(Cell::ruleSource)
                     )
                     .apply(inst, Cell::new)
     );
 
+    public static final Codec<Holder<Cell>> CODEC = RegistryFileCodec.create(CellworldRegistries.CELL_REGISTRY_KEY, DIRECT_CODEC);
+
     private Cell(Holder<Biome> biome, Optional<SurfaceRules.RuleSource> ruleSource) {
         this.biome = biome;
-        this.ruleSource = ruleSource;
+        this.opt = ruleSource;
     }
 
     private Cell(Holder<Biome> biome) {
@@ -47,5 +45,5 @@ public class Cell {
 
     public Holder<Biome> biome() { return this.biome; }
 
-    public Optional<SurfaceRules.RuleSource> ruleSource() { return this.ruleSource; }
+    public Optional<SurfaceRules.RuleSource> ruleSource() { return this.opt; }
 }

@@ -1,8 +1,9 @@
 package com.flashfyre.cellworld;
 
+import com.flashfyre.cellworld.cells.Cell;
 import com.flashfyre.cellworld.cells.CellMap;
-import com.flashfyre.cellworld.cells.CellSelector;
-import com.flashfyre.cellworld.cells.RandomFromWeightedListHolderSet;
+import com.flashfyre.cellworld.cells.selector.CellSelectionSet;
+import com.flashfyre.cellworld.cells.selector.WeightedRandomSelectionSet;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
@@ -33,16 +34,21 @@ public class CellularBiomeSource extends BiomeSource {
         return flattenSelector(this.cellMap.value().cells());
     }
 
-    public static Stream<Holder<Biome>> flattenSelector(CellSelector selector) {
-        if(selector instanceof RandomFromWeightedListHolderSet weightedRandomHolderSet) {
+    public static Stream<Holder<Biome>> flattenSelector(CellSelectionSet selector) {
+        if(selector instanceof WeightedRandomSelectionSet weightedRandomHolderSet) {
             weightedRandomHolderSet.buildList();
         }
-        return selector.all().flatMap(entry -> flatten(entry.value()));
+        Either<Stream<Holder<Cell>>, Stream<CellSelectionSet>> all = selector.all();
+        if(all.left().isPresent()) {
+            return all.left().orElseThrow().map(e -> e.value().biome());
+        } else {
+            return all.right().orElseThrow().flatMap(CellularBiomeSource::flattenSelector);
+        }
     }
 
-    public static Stream<Holder<Biome>> flatten(Either<Cell, CellSelector> either) {
+    public static Stream<Holder<Biome>> flatten(Either<Holder<Cell>, CellSelectionSet> either) {
         if (either.left().isPresent()) {
-            return Stream.of(either.left().orElseThrow().biome());
+            return Stream.of(either.left().orElseThrow().value().biome());
         } else {
             return flattenSelector(either.right().orElseThrow());
         }
@@ -50,6 +56,6 @@ public class CellularBiomeSource extends BiomeSource {
 
     @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler sampler) {
-        return this.cellMap.value().getCell(x<<2, z<<2).biome();
+        return this.cellMap.value().getCell(x<<2, z<<2).biome(); // Here, x y and z are QuartPos so we need to divide by 4
     }
 }

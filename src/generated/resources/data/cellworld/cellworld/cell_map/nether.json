@@ -1,9 +1,11 @@
 {
-  "cell_size": [
-    32
-  ],
-  "cells": {
+  "cell_selector": {
     "cells": "#cellworld:nether",
-    "selector_type": "cellworld:random_from_weighted_list_holderset"
-  }
+    "picker_type": "cellworld:weighted_random"
+  },
+  "cell_size": [
+    64,
+    32,
+    16
+  ]
 }

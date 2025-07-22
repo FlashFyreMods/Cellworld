@@ -1,6 +1,6 @@
 package com.flashfyre.cellworld.levelgen;
 
-import com.flashfyre.cellworld.cells.CellMap;
+import com.flashfyre.cellworld.cells.CellSelectionTree;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -27,13 +27,13 @@ public class CellworldSurfaceRules {
 
 
     public static SurfaceRules.RuleSource nether(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        HolderGetter<CellMap> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
+        HolderGetter<CellSelectionTree> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
         SurfaceRules.ConditionSource condition4 = net.minecraft.world.level.levelgen.SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
         return net.minecraft.world.level.levelgen.SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK),
                 SurfaceRules.ifTrue(SurfaceRules.not(SurfaceRules.verticalGradient("bedrock_roof", VerticalAnchor.belowTop(5), VerticalAnchor.top())), BEDROCK),
                 SurfaceRules.ifTrue(condition4, NETHERRACK),
-                new CellMapRuleSource(cellMaps.getOrThrow(CellMap.NETHER))
+                new CellMapRuleSource(cellMaps.getOrThrow(CellSelectionTree.NETHER))
         );
     }
 
@@ -157,7 +157,8 @@ public class CellworldSurfaceRules {
                 SurfaceRules.ifTrue(
                         SurfaceRules.ON_FLOOR,
                         SurfaceRules.ifTrue(SurfaceRules.not(aboveY32), SurfaceRules.ifTrue(isHole, LAVA))
-                )
+                ),
+                BLACKSTONE
         );
     }
 

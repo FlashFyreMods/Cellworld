@@ -4,6 +4,7 @@ import com.flashfyre.cellworld.cells.Cell;
 import com.flashfyre.cellworld.Cellworld;
 import com.flashfyre.cellworld.levelgen.CellworldSurfaceRules;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
@@ -21,12 +22,12 @@ public class CellworldCells {
 
     public static void bootstrap(BootstrapContext<Cell> ctx) {
         HolderGetter<Biome> biomes = ctx.lookup(Registries.BIOME);
-        ctx.register(NETHER_WASTES, Cell.of(biomes, Biomes.NETHER_WASTES, CellworldSurfaceRules.netherWastes()));
-        ctx.register(SOUL_SAND_VALLEY, Cell.of(biomes, Biomes.SOUL_SAND_VALLEY, CellworldSurfaceRules.soulSandValley()));
-        ctx.register(WARPED_FOREST, Cell.of(biomes, Biomes.WARPED_FOREST, CellworldSurfaceRules.warpedForest()));
-        ctx.register(CRIMSON_FOREST, Cell.of(biomes, Biomes.CRIMSON_FOREST, CellworldSurfaceRules.crimsonForest()));
-        ctx.register(BASALT_DELTAS, Cell.of(biomes, Biomes.BASALT_DELTAS, CellworldSurfaceRules.basaltDeltas()));
-        ctx.register(GILDED_DEPTHS, Cell.of(biomes, CellworldBiomes.GILDED_DEPTHS, CellworldSurfaceRules.gildedDepths()));
+        ctx.register(NETHER_WASTES, Cell.withSurfaceRules(biomes, Biomes.NETHER_WASTES, CellworldSurfaceRules.netherWastes()));
+        ctx.register(SOUL_SAND_VALLEY, Cell.withSurfaceRules(biomes, Biomes.SOUL_SAND_VALLEY, CellworldSurfaceRules.soulSandValley()));
+        ctx.register(WARPED_FOREST, Cell.withSurfaceRules(biomes, Biomes.WARPED_FOREST, CellworldSurfaceRules.warpedForest()));
+        ctx.register(CRIMSON_FOREST, Cell.withSurfaceRules(biomes, Biomes.CRIMSON_FOREST, CellworldSurfaceRules.crimsonForest()));
+        ctx.register(BASALT_DELTAS, Cell.withSurfaceRules(biomes, Biomes.BASALT_DELTAS, CellworldSurfaceRules.basaltDeltas()));
+        ctx.register(GILDED_DEPTHS, Cell.withSurfaceRules(biomes, CellworldBiomes.GILDED_DEPTHS, CellworldSurfaceRules.gildedDepths()));
     }
 
     private static ResourceKey<Cell> createKey(String name) {

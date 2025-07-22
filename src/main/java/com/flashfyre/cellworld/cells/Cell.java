@@ -26,7 +26,7 @@ public class Cell {
 
     public static final Codec<Holder<Cell>> CODEC = RegistryFileCodec.create(CellworldRegistries.CELL_REGISTRY_KEY, DIRECT_CODEC);
 
-    private Cell(Holder<Biome> biome, Optional<SurfaceRules.RuleSource> ruleSource) {
+    protected Cell(Holder<Biome> biome, Optional<SurfaceRules.RuleSource> ruleSource) {
         this.biome = biome;
         this.opt = ruleSource;
     }
@@ -35,12 +35,12 @@ public class Cell {
         this(biome, Optional.empty());
     }
 
-    public static Cell of(HolderGetter<Biome> biomeGetter, ResourceKey<Biome> biome) {
-        return new Cell(biomeGetter.getOrThrow(biome), Optional.empty());
+    public static Cell withSurfaceRules(HolderGetter<Biome> biomeGetter, ResourceKey<Biome> biome, SurfaceRules.RuleSource ruleSource) {
+        return new Cell(biomeGetter.getOrThrow(biome), Optional.of(ruleSource));
     }
 
-    public static Cell of(HolderGetter<Biome> biomeGetter, ResourceKey<Biome> biome, SurfaceRules.RuleSource ruleSource) {
-        return new Cell(biomeGetter.getOrThrow(biome), Optional.of(ruleSource));
+    public static Cell simple(HolderGetter<Biome> biomeGetter, ResourceKey<Biome> biome) {
+        return new Cell(biomeGetter.getOrThrow(biome), Optional.empty());
     }
 
     public Holder<Biome> biome() { return this.biome; }

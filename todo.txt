@@ -1,1 +1,33 @@
-- Make oceans generate according to temperature
+- Make custom nether noise settings with cell map rulesource
+- Also, make nether biomes bigger
+- Consider adding sample offset
+- Add features such as gilded blackstone to gilded depths
+- Add another kind of nether biome
+- Experiment with 3D biomes
+
+- Make cell map take Cell or TerrainConfiguredCell
+- Code logic for cell height density function expecting TerrainConfiguredCell
+- Make densityfunction provide custom height
+- Add smoothing around biome borders
+
+- Investigate seeding and ensure it is deterministic and varies based on world seed
+
+Cell Selection Types:
+- Select cells from tag
+- Select cells from list
+
+Random Cell Selection:
+- Select from tag
+- Select from list
+
+Simple Weighted Cell Selection:
+- Select from tag (configured cell with 1 int)
+- Select from 
+
+Level Parameter Selection:
+- List type:
+	- bool (ascending/descending)
+	- parameter
+	- list of items with:
+		- cell/cell selector
+		- parameter value they need to be less/greater than

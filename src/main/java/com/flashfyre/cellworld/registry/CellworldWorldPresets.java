@@ -32,8 +32,8 @@ public class CellworldWorldPresets {
     public static void bootstrap(BootstrapContext<WorldPreset> ctx) {
         HolderGetter<Biome> biomes = ctx.lookup(Registries.BIOME);
         HolderGetter<NoiseGeneratorSettings> noiseSettingsGetter = ctx.lookup(Registries.NOISE_SETTINGS);
-        HolderGetter<WeightedCell> weightedCellEntries = ctx.lookup(CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY);
-        HolderGetter<CellMap> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
+        HolderGetter<SingleIntConfiguredCell> weightedCellEntries = ctx.lookup(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL);
+        HolderGetter<CellSelectionTree> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
 
         BiomeSource fixed = new FixedBiomeSource(biomes.getOrThrow(Biomes.MUSHROOM_FIELDS));
         /*BiomeSource cellularOverworld = new CellularBiomeSource(new CellMap(List.of(64, 16),
@@ -65,10 +65,10 @@ public class CellworldWorldPresets {
                 RandomFromWeightedList.entry(Cell.of(biomes, Biomes.OCEAN), 100)
         ))));*/
         //BiomeSource cellularNether = new CellularBiomeSource(new CellMap(List.of(32), new RandomFromWeightedListHolderSet(weightedCellEntries.getOrThrow(RandomFromWeightedList.WeightedCellEntry.NETHER))));
-        BiomeSource cellularNether = new CellularBiomeSource(cellMaps.getOrThrow(CellMap.NETHER));
+        BiomeSource cellularNether = new CellularBiomeSource(cellMaps.getOrThrow(CellSelectionTree.NETHER));
         //registerFlat(ctx, CELLULAR, cellularOverworld, biomes);
         registerFlatNoiseBased(ctx, CELLULAR, cellularNether, noiseSettingsGetter);
-        registerNether(ctx, CELLULAR_NETHER, cellularNether, noiseSettingsGetter, biomes);
+        //registerNether(ctx, CELLULAR_NETHER, cellularNether, noiseSettingsGetter, biomes);
     }
 
     public static void registerFlat(BootstrapContext<WorldPreset> ctx, ResourceKey<WorldPreset> presetKey, BiomeSource biomeSource, HolderGetter<Biome> biomeGetter) {

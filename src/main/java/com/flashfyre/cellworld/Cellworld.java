@@ -1,9 +1,9 @@
 package com.flashfyre.cellworld;
 
 import com.flashfyre.cellworld.cells.*;
-import com.flashfyre.cellworld.cells.selector.CellSelectionSet;
-import com.flashfyre.cellworld.cells.selector.WeightedRandomSelectionSet;
+import com.flashfyre.cellworld.cells.selector.*;
 import com.flashfyre.cellworld.chunkgenerator.BetterFlatLevelSource;
+import com.flashfyre.cellworld.levelgen.CellMapHeightDensityFunction;
 import com.flashfyre.cellworld.registry.*;
 import com.flashfyre.cellworld.levelgen.CellMapRuleSource;
 import com.mojang.serialization.MapCodec;
@@ -14,6 +14,7 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -37,25 +38,47 @@ public class Cellworld {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final DeferredRegister<MapCodec<? extends BiomeSource>> BIOME_SOURCES = DeferredRegister.create(Registries.BIOME_SOURCE, Cellworld.MOD_ID);
     public static final DeferredRegister<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATORS = DeferredRegister.create(Registries.CHUNK_GENERATOR, Cellworld.MOD_ID);
+    public static final DeferredRegister<MapCodec<? extends DensityFunction>> DENSITY_FUNCTION_TYPES = DeferredRegister.create(Registries.DENSITY_FUNCTION_TYPE, Cellworld.MOD_ID);
 
     public static final DeferredHolder<MapCodec<? extends BiomeSource>, MapCodec<CellularBiomeSource>> CELLULAR = BIOME_SOURCES.register("cellular", () -> CellularBiomeSource.CODEC);
+
     public static final DeferredHolder<MapCodec<? extends ChunkGenerator>, MapCodec<BetterFlatLevelSource>> BETTER_FLAT = CHUNK_GENERATORS.register("cellular", () -> BetterFlatLevelSource.CODEC);
+
+    public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<CellMapHeightDensityFunction>> CELL_MAP_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("cell_map", CellMapHeightDensityFunction.CODEC::codec);
 
     public static final DeferredRegister<MapCodec<? extends SurfaceRules.RuleSource>> MATERIAL_RULES = DeferredRegister.create(Registries.MATERIAL_RULE, Cellworld.MOD_ID);
     public static final DeferredHolder<MapCodec<? extends SurfaceRules.RuleSource>, MapCodec<CellMapRuleSource>> CELL_MAP_RULE = MATERIAL_RULES.register("cell_map", () -> CellMapRuleSource.MAP_CODEC);
 
-    public static final DeferredRegister<MapCodec<? extends CellSelectionSet>> SELECTOR_TYPES = DeferredRegister.create(CellworldRegistries.SELECTOR_TYPE_REGISTRY_KEY, MOD_ID);
+    public static final DeferredRegister<MapCodec<? extends CellSelector>> BIOME_CELL_SELECTOR_TYPES = DeferredRegister.create(CellworldRegistries.SELECTOR_TYPE_REGISTRY_KEY, MOD_ID);
+
+
+    public static final DeferredRegister<MapCodec<? extends LevelParameter>> LEVEL_PARAMETER_TYPES = DeferredRegister.create(CellworldRegistries.LEVEL_PARAMETER_TYPES_REGISTRY_KEY, MOD_ID);
+    public static final DeferredHolder<MapCodec<? extends LevelParameter>, MapCodec<? extends LevelParameter>> DIST_FROM_XZ_COORD =
+            LEVEL_PARAMETER_TYPES.register("dist_from_xz_coord", () -> LevelParameter.DistFromXZCoord.CODEC);
+    public static final DeferredHolder<MapCodec<? extends LevelParameter>, MapCodec<? extends LevelParameter>> HEIGHT =
+            LEVEL_PARAMETER_TYPES.register("height", () -> LevelParameter.Height.CODEC);
+
+
+
+
+
+
+
     //public static final DeferredHolder<MapCodec<? extends CellSelectionSet>,MapCodec<? extends CellSelectionSet>> RANDOM_FROM_LIST = SELECTOR_TYPES.register("random_from_list", () -> RandomFromList.CODEC);
     //public static final DeferredHolder<MapCodec<? extends CellSelectionSet>,MapCodec<? extends CellSelectionSet>> RANDOM_FROM_WEIGHTED_LIST = SELECTOR_TYPES.register("random_from_weighted_list", () -> RandomFromWeightedList.CODEC);
-    public static final DeferredHolder<MapCodec<? extends CellSelectionSet>,MapCodec<? extends CellSelectionSet>> WEIGHTED_RANDOM = SELECTOR_TYPES.register("weighted_random", () -> WeightedRandomSelectionSet.CODEC);
+    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> RANDOM = BIOME_CELL_SELECTOR_TYPES.register("random", () -> RandomSelector.CODEC);
+    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> WEIGHTED_RANDOM = BIOME_CELL_SELECTOR_TYPES.register("weighted_random", () -> WeightedRandomSelector.CODEC);
+    public static final DeferredHolder<MapCodec<? extends CellSelector>,MapCodec<? extends CellSelector>> LEVEL_PARAMETER_VALUE = BIOME_CELL_SELECTOR_TYPES.register("level_parameter_value", () -> LevelParameterValueSelector.CODEC);
 
     public Cellworld(IEventBus modBus, ModContainer container) {
         modBus.addListener(this::registerRegistries);
         modBus.addListener(this::registerDatapackRegistries);
         modBus.addListener(this::gatherData);
+        DENSITY_FUNCTION_TYPES.register(modBus);
         BIOME_SOURCES.register(modBus);
         CHUNK_GENERATORS.register(modBus);
-        SELECTOR_TYPES.register(modBus);
+        LEVEL_PARAMETER_TYPES.register(modBus);
+        BIOME_CELL_SELECTOR_TYPES.register(modBus);
         MATERIAL_RULES.register(modBus);
     }
 
@@ -74,8 +97,9 @@ public class Cellworld {
                                 .add(Registries.WORLD_PRESET, CellworldWorldPresets::bootstrap)
                                 .add(Registries.BIOME, CellworldBiomes::bootstrap)
                                 .add(CellworldRegistries.CELL_REGISTRY_KEY, CellworldCells::bootstrap)
-                                .add(CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY, WeightedCell::bootstrap)
-                                .add(CellworldRegistries.CELL_MAP_REGISTRY_KEY, CellMap::bootstrap),
+                                .add(CellworldRegistries.TERRAIN_CONFIGURED_CELL_REGISTRY_KEY, TerrainAugmentedCell::bootstrap)
+                                .add(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL, SingleIntConfiguredCell::bootstrap)
+                                .add(CellworldRegistries.CELL_MAP_REGISTRY_KEY, CellSelectionTree::bootstrap),
                         Set.of(MOD_ID)
                 )
         );
@@ -88,6 +112,7 @@ public class Cellworld {
 
     public void registerRegistries(NewRegistryEvent event) {
         event.register(CellworldRegistries.SELECTOR_TYPE_REGISTRY);
+        event.register(CellworldRegistries.LEVEL_PARAMETER_TYPE_REGISTRY);
     }
 
     /*public static final DeferredRegister<RuleTestType<?>> RULE_TEST_TYPES = DeferredRegister.create(Registries.RULE_TEST, Cellworld.MOD_ID);
@@ -103,13 +128,18 @@ public class Cellworld {
                 null
         );
         event.dataPackRegistry(
-                CellworldRegistries.WEIGHTED_CELL_ENTRY_REGISTRY_KEY,
-                WeightedCell.DIRECT_CODEC,
+                CellworldRegistries.TERRAIN_CONFIGURED_CELL_REGISTRY_KEY,
+                TerrainAugmentedCell.DIRECT_CODEC,
+                null
+        );
+        event.dataPackRegistry(
+                CellworldRegistries.SINGLE_INT_CONFIGURED_CELL,
+                SingleIntConfiguredCell.DIRECT_CODEC,
                 null
         );
         event.dataPackRegistry(
                 CellworldRegistries.CELL_MAP_REGISTRY_KEY,
-                CellMap.DIRECT_CODEC,
+                CellSelectionTree.DIRECT_CODEC,
                 null
         );
     }

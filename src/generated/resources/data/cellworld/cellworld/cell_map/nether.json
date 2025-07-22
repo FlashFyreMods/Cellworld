@@ -1,11 +1,48 @@
 {
   "cell_selector": {
-    "cells": "#cellworld:nether",
-    "picker_type": "cellworld:weighted_random"
+    "type": "cellworld:level_parameter_value",
+    "default_element": {
+      "cell": "cellworld:nether_wastes"
+    },
+    "elements": [
+      {
+        "cell": "cellworld:basalt_deltas",
+        "parameter_value": 100.0
+      },
+      {
+        "cell_selector": {
+          "type": "cellworld:random",
+          "elements": [
+            {
+              "cell": "cellworld:warped_forest"
+            },
+            {
+              "cell": "cellworld:crimson_forest"
+            }
+          ]
+        },
+        "parameter_value": 200.0
+      },
+      {
+        "cell_selector": {
+          "type": "cellworld:random",
+          "elements": [
+            {
+              "cell": "cellworld:soul_sand_valley"
+            },
+            {
+              "cell": "cellworld:gilded_depths"
+            }
+          ]
+        },
+        "parameter_value": 300.0
+      }
+    ],
+    "level_parameter": {
+      "type": "cellworld:dist_from_xz_coord"
+    }
   },
-  "cell_size": [
-    64,
-    32,
-    16
+  "layer_sizes": [
+    32
   ]
 }

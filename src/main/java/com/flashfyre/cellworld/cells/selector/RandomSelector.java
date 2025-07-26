@@ -28,10 +28,10 @@ public record RandomSelector(List<CellTreeElement> cells) implements CellSelecto
     @Override
     public Stream<Holder<Cell>> streamCells() {
         return cells.stream().flatMap(e -> {
-            if(e.left().isPresent()) {
-                return Stream.of(e.left().orElseThrow());
+            if(e.getCell().isPresent()) {
+                return Stream.of(e.getCell().orElseThrow());
             } else {
-                return e.right().orElseThrow().streamCells();
+                return e.getSelector().orElseThrow().streamCells();
             }
         });
     }

@@ -1,18 +1,18 @@
 package com.flashfyre.cellworld.levelgen;
 
 import com.flashfyre.cellworld.cells.Cell;
-import com.flashfyre.cellworld.cells.CellSelectionTree;
+import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.world.level.levelgen.DensityFunction;
 
-public record CellMapHeightDensityFunction(Holder<CellSelectionTree> cellMap) implements DensityFunction {
+public record CellMapHeightDensityFunction(Holder<CellSelectionTreeOld> cellMap) implements DensityFunction {
 
     public static final MapCodec<CellMapHeightDensityFunction> DATA_CODEC = RecordCodecBuilder.mapCodec(
             p_208597_ -> p_208597_.group(
-                            CellSelectionTree.CODEC.fieldOf("input").forGetter(CellMapHeightDensityFunction::cellMap))
+                            CellSelectionTreeOld.CODEC.fieldOf("input").forGetter(CellMapHeightDensityFunction::cellMap))
                     .apply(p_208597_, CellMapHeightDensityFunction::new)
     );
     public static final KeyDispatchDataCodec<CellMapHeightDensityFunction> CODEC = makeCodec(DATA_CODEC);

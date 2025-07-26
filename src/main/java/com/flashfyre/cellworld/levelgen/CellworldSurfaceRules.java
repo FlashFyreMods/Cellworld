@@ -1,6 +1,7 @@
 package com.flashfyre.cellworld.levelgen;
 
 import com.flashfyre.cellworld.cells.CellSelectionTree;
+import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -25,15 +26,30 @@ public class CellworldSurfaceRules {
     public static final SurfaceRules.RuleSource NETHER_WART_BLOCK = stateRule(Blocks.NETHER_WART_BLOCK);
     public static final SurfaceRules.RuleSource CRIMSON_NYLIUM = stateRule(Blocks.CRIMSON_NYLIUM);
 
+    public static final SurfaceRules.RuleSource OBSIDIAN = stateRule(Blocks.OBSIDIAN);
+    public static final SurfaceRules.RuleSource AMETHYST = stateRule(Blocks.AMETHYST_BLOCK);
+    public static final SurfaceRules.RuleSource END_STONE = stateRule(Blocks.END_STONE);
 
-    public static SurfaceRules.RuleSource nether(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        HolderGetter<CellSelectionTree> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
+
+    /*public static SurfaceRules.RuleSource nether(BootstrapContext<NoiseGeneratorSettings> ctx) {
+        HolderGetter<CellSelectionTreeOld> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
         SurfaceRules.ConditionSource condition4 = net.minecraft.world.level.levelgen.SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
         return net.minecraft.world.level.levelgen.SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK),
                 SurfaceRules.ifTrue(SurfaceRules.not(SurfaceRules.verticalGradient("bedrock_roof", VerticalAnchor.belowTop(5), VerticalAnchor.top())), BEDROCK),
                 SurfaceRules.ifTrue(condition4, NETHERRACK),
-                new CellMapRuleSource(cellMaps.getOrThrow(CellSelectionTree.NETHER))
+                new CellMapRuleSource(cellMaps.getOrThrow(CellSelectionTreeOld.NETHER))
+        );
+    }*/
+
+    public static SurfaceRules.RuleSource end(BootstrapContext<NoiseGeneratorSettings> ctx) {
+        HolderGetter<CellSelectionTree> cellTrees = ctx.lookup(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY);
+        SurfaceRules.ConditionSource condition4 = net.minecraft.world.level.levelgen.SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
+        return net.minecraft.world.level.levelgen.SurfaceRules.sequence(
+                SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK),
+                SurfaceRules.ifTrue(SurfaceRules.not(SurfaceRules.verticalGradient("bedrock_roof", VerticalAnchor.belowTop(5), VerticalAnchor.top())), BEDROCK),
+                SurfaceRules.ifTrue(condition4, NETHERRACK),
+                new CellMapRuleSource(cellTrees.getOrThrow(CellSelectionTree.END))
         );
     }
 
@@ -160,6 +176,14 @@ public class CellworldSurfaceRules {
                 ),
                 BLACKSTONE
         );
+    }
+
+    public static SurfaceRules.RuleSource obsidianSpires() {
+        return OBSIDIAN;
+    }
+
+    public static SurfaceRules.RuleSource amethystFields() {
+        return AMETHYST;
     }
 
     public static SurfaceRules.RuleSource stateRule(Block block) {

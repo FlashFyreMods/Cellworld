@@ -57,6 +57,8 @@ public class Cellworld {
             LEVEL_PARAMETER_TYPES.register("dist_from_xz_coord", () -> LevelParameter.DistFromXZCoord.CODEC);
     public static final DeferredHolder<MapCodec<? extends LevelParameter>, MapCodec<? extends LevelParameter>> HEIGHT =
             LEVEL_PARAMETER_TYPES.register("height", () -> LevelParameter.Height.CODEC);
+    public static final DeferredHolder<MapCodec<? extends LevelParameter>, MapCodec<? extends LevelParameter>> ANGLE_FROM_XZ_COORD =
+            LEVEL_PARAMETER_TYPES.register("angle_from_xz_coord", () -> LevelParameter.AngleFromXZCoord.CODEC);
 
 
 
@@ -99,7 +101,7 @@ public class Cellworld {
                                 .add(CellworldRegistries.CELL_REGISTRY_KEY, CellworldCells::bootstrap)
                                 .add(CellworldRegistries.TERRAIN_CONFIGURED_CELL_REGISTRY_KEY, TerrainAugmentedCell::bootstrap)
                                 .add(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL, SingleIntConfiguredCell::bootstrap)
-                                .add(CellworldRegistries.CELL_MAP_REGISTRY_KEY, CellSelectionTree::bootstrap),
+                                .add(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY, CellSelectionTree::bootstrap),
                         Set.of(MOD_ID)
                 )
         );
@@ -138,7 +140,7 @@ public class Cellworld {
                 null
         );
         event.dataPackRegistry(
-                CellworldRegistries.CELL_MAP_REGISTRY_KEY,
+                CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY,
                 CellSelectionTree.DIRECT_CODEC,
                 null
         );

@@ -1,0 +1,9 @@
+{
+  "biome": "cellworld:obsidian_spires",
+  "surface_rules": {
+    "type": "minecraft:block",
+    "result_state": {
+      "Name": "minecraft:obsidian"
+    }
+  }
+}

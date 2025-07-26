@@ -1,11 +1,8 @@
 package com.flashfyre.cellworld.registry;
 
-import com.flashfyre.cellworld.cells.Cell;
+import com.flashfyre.cellworld.cells.*;
 import com.flashfyre.cellworld.Cellworld;
-import com.flashfyre.cellworld.cells.CellSelectionTree;
-import com.flashfyre.cellworld.cells.TerrainAugmentedCell;
 import com.flashfyre.cellworld.cells.selector.CellSelector;
-import com.flashfyre.cellworld.cells.SingleIntConfiguredCell;
 import com.flashfyre.cellworld.cells.selector.LevelParameter;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
@@ -18,7 +15,8 @@ public class CellworldRegistries {
     public static final ResourceKey<Registry<Cell>> CELL_REGISTRY_KEY = createKey("cell");
     public static final ResourceKey<Registry<TerrainAugmentedCell>> TERRAIN_CONFIGURED_CELL_REGISTRY_KEY = createKey("terrain_configured_cell");
     public static final ResourceKey<Registry<SingleIntConfiguredCell>> SINGLE_INT_CONFIGURED_CELL = createKey("single_int_configured_cell");
-    public static final ResourceKey<Registry<CellSelectionTree>> CELL_MAP_REGISTRY_KEY = createKey("cell_map");
+    public static final ResourceKey<Registry<CellSelectionTreeOld>> CELL_MAP_REGISTRY_KEY = createKey("cell_map");
+    public static final ResourceKey<Registry<CellSelectionTree>> CELL_SELECTION_TREE_REGISTRY_KEY = createKey("cell_selection_tree");
 
     public static final ResourceKey<Registry<MapCodec<? extends CellSelector>>> SELECTOR_TYPE_REGISTRY_KEY = createKey("selector_types");
     public static final ResourceKey<Registry<MapCodec<? extends LevelParameter>>> LEVEL_PARAMETER_TYPES_REGISTRY_KEY = createKey("value_selector_parameter_types");

@@ -1,0 +1,33 @@
+{
+  "first_layer": {
+    "first_layer_scale": 64,
+    "selector": {
+      "type": "cellworld:level_parameter_value",
+      "default_element": {
+        "cell_selector": {
+          "type": "cellworld:random",
+          "elements": [
+            {
+              "cell": "cellworld:end_highlands"
+            },
+            {
+              "cell": "cellworld:obsidian_spires"
+            },
+            {
+              "cell": "cellworld:amethyst_fields"
+            }
+          ]
+        }
+      },
+      "elements": [
+        {
+          "cell": "cellworld:the_end",
+          "parameter_value": 1000.0
+        }
+      ],
+      "level_parameter": {
+        "type": "cellworld:dist_from_xz_coord"
+      }
+    }
+  }
+}

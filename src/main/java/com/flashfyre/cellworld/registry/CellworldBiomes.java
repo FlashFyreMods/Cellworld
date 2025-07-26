@@ -26,6 +26,9 @@ public class CellworldBiomes {
 
     public static final ResourceKey<Biome> GILDED_DEPTHS = createKey("gilded_depths");
 
+    public static final ResourceKey<Biome> OBSIDIAN_SPIRES = createKey("obsidian_spires");
+    public static final ResourceKey<Biome> AMETHYST_FIELDS = createKey("amethyst_fields");
+
     private static ResourceKey<Biome> createKey(String name) {
         return ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(Cellworld.MOD_ID, name));
     }
@@ -33,7 +36,10 @@ public class CellworldBiomes {
     public static void bootstrap(BootstrapContext<Biome> ctx) {
         HolderGetter<PlacedFeature> placedFeatures = ctx.lookup(Registries.PLACED_FEATURE);
         HolderGetter<ConfiguredWorldCarver<?>> configuredCarvers = ctx.lookup(Registries.CONFIGURED_CARVER);
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, configuredCarvers);
         ctx.register(GILDED_DEPTHS, gildedDepths(placedFeatures, configuredCarvers));
+        ctx.register(OBSIDIAN_SPIRES, baseEndBiome(builder));
+        ctx.register(AMETHYST_FIELDS, baseEndBiome(builder));
     }
 
     public static Biome gildedDepths(HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
@@ -73,6 +79,27 @@ public class CellworldBiomes {
                 )
                 .mobSpawnSettings(mobspawnsettings)
                 .generationSettings(builder.build())
+                .build();
+    }
+
+    private static Biome baseEndBiome(BiomeGenerationSettings.Builder generationSettings) {
+        MobSpawnSettings.Builder mobspawnsettings$builder = new MobSpawnSettings.Builder();
+        BiomeDefaultFeatures.endSpawns(mobspawnsettings$builder);
+        return new Biome.BiomeBuilder()
+                .hasPrecipitation(false)
+                .temperature(0.5F)
+                .downfall(0.5F)
+                .specialEffects(
+                        new BiomeSpecialEffects.Builder()
+                                .waterColor(4159204)
+                                .waterFogColor(329011)
+                                .fogColor(10518688)
+                                .skyColor(0)
+                                .ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+                                .build()
+                )
+                .mobSpawnSettings(mobspawnsettings$builder.build())
+                .generationSettings(generationSettings.build())
                 .build();
     }
 

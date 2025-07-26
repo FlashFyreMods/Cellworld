@@ -20,6 +20,11 @@ public class CellworldCells {
     public static final ResourceKey<Cell> BASALT_DELTAS = createKey("basalt_deltas");
     public static final ResourceKey<Cell> GILDED_DEPTHS = createKey("gilded_depths");
 
+    public static final ResourceKey<Cell> THE_END = createKey("the_end");
+    public static final ResourceKey<Cell> END_HIGHLANDS = createKey("end_highlands");
+    public static final ResourceKey<Cell> OBSIDIAN_SPIRES = createKey("obsidian_spires");
+    public static final ResourceKey<Cell> AMETHYST_FIELDS = createKey("amethyst_fields");
+
     public static void bootstrap(BootstrapContext<Cell> ctx) {
         HolderGetter<Biome> biomes = ctx.lookup(Registries.BIOME);
         ctx.register(NETHER_WASTES, Cell.withSurfaceRules(biomes, Biomes.NETHER_WASTES, CellworldSurfaceRules.netherWastes()));
@@ -28,6 +33,11 @@ public class CellworldCells {
         ctx.register(CRIMSON_FOREST, Cell.withSurfaceRules(biomes, Biomes.CRIMSON_FOREST, CellworldSurfaceRules.crimsonForest()));
         ctx.register(BASALT_DELTAS, Cell.withSurfaceRules(biomes, Biomes.BASALT_DELTAS, CellworldSurfaceRules.basaltDeltas()));
         ctx.register(GILDED_DEPTHS, Cell.withSurfaceRules(biomes, CellworldBiomes.GILDED_DEPTHS, CellworldSurfaceRules.gildedDepths()));
+
+        ctx.register(THE_END, Cell.withSurfaceRules(biomes, Biomes.THE_END, CellworldSurfaceRules.END_STONE));
+        ctx.register(END_HIGHLANDS, Cell.withSurfaceRules(biomes, Biomes.END_HIGHLANDS, CellworldSurfaceRules.END_STONE));
+        ctx.register(OBSIDIAN_SPIRES, Cell.withSurfaceRules(biomes, CellworldBiomes.OBSIDIAN_SPIRES, CellworldSurfaceRules.obsidianSpires()));
+        ctx.register(AMETHYST_FIELDS, Cell.withSurfaceRules(biomes, CellworldBiomes.AMETHYST_FIELDS, CellworldSurfaceRules.amethystFields()));
     }
 
     private static ResourceKey<Cell> createKey(String name) {

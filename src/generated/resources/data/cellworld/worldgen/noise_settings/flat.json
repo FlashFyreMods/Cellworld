@@ -1,7 +1,7 @@
 {
   "aquifers_enabled": false,
   "default_block": {
-    "Name": "minecraft:netherrack"
+    "Name": "minecraft:end_stone"
   },
   "default_fluid": {
     "Name": "minecraft:lava",
@@ -112,7 +112,7 @@
       },
       {
         "type": "cellworld:cell_map",
-        "cell_map": "cellworld:nether"
+        "cell_selection_tree": "cellworld:end"
       }
     ]
   }

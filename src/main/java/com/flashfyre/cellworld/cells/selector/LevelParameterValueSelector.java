@@ -3,7 +3,6 @@ package com.flashfyre.cellworld.cells.selector;
 import com.flashfyre.cellworld.Cellworld;
 import com.flashfyre.cellworld.cells.Cell;
 import com.flashfyre.cellworld.cells.CellTreeElement;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -61,10 +60,10 @@ public class LevelParameterValueSelector implements CellSelector {
     public Stream<Holder<Cell>> streamCells() {
         return this.cells.stream().flatMap(p -> {
             CellTreeElement element = p.getSecond();
-            if(element.left().isPresent()) {
-                return Stream.of(element.left().orElseThrow());
+            if(element.getCell().isPresent()) {
+                return Stream.of(element.getCell().orElseThrow());
             } else {
-                return element.right().orElseThrow().streamCells();
+                return element.getSelector().orElseThrow().streamCells();
             }
         });
     }

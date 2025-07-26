@@ -1,0 +1,9 @@
+{
+  "biome": "minecraft:end_highlands",
+  "surface_rules": {
+    "type": "minecraft:block",
+    "result_state": {
+      "Name": "minecraft:end_stone"
+    }
+  }
+}

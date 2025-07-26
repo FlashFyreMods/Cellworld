@@ -1,6 +1,7 @@
 package com.flashfyre.cellworld;
 
 import com.flashfyre.cellworld.cells.CellSelectionTree;
+import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.*;
@@ -10,14 +11,14 @@ import java.util.stream.Stream;
 
 public class CellularBiomeSource extends BiomeSource {
     public static final MapCodec<CellularBiomeSource> CODEC = CellSelectionTree.CODEC
-            .fieldOf("cell_map")
-            .xmap(CellularBiomeSource::new, s -> s.cellMap);
+            .fieldOf("cell_selection_tree")
+            .xmap(CellularBiomeSource::new, s -> s.cellSelectionTree);
 
 
-    private final Holder<CellSelectionTree> cellMap;
+    private final Holder<CellSelectionTree> cellSelectionTree;
 
-    public CellularBiomeSource(Holder<CellSelectionTree> cellMap) {
-        this.cellMap = cellMap;
+    public CellularBiomeSource(Holder<CellSelectionTree> cellSelectionTree) {
+        this.cellSelectionTree = cellSelectionTree;
     }
 
     @Override
@@ -27,11 +28,11 @@ public class CellularBiomeSource extends BiomeSource {
 
     @Override
     protected @NotNull Stream<Holder<Biome>> collectPossibleBiomes() {
-        return this.cellMap.value().cellSelector().streamCells().map(e -> e.value().biome());
+        return this.cellSelectionTree.value().streamCells().map(e -> e.value().biome());
     }
 
     @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler sampler) {
-        return this.cellMap.value().getCell(x<<2, z<<2).biome(); // Here, x y and z are QuartPos so we need to divide by 4
+        return this.cellSelectionTree.value().getCell(x<<2, z<<2).biome(); // Here, x y and z are QuartPos so we need to divide by 4
     }
 }

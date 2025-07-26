@@ -2,9 +2,11 @@ package com.flashfyre.cellworld.cells;
 
 import com.flashfyre.cellworld.cells.selector.CellSelector;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
 
@@ -16,9 +18,9 @@ public class CellTreeElement {
             ).apply(instance, CellEntry::new))
     );*/
 
-    private Either<Holder<Cell>, CellSelector> value;
+    private Either<Holder<Cell>, Either<CellSelector, Pair<Integer, String>>> value;
 
-    private CellTreeElement(Either<Holder<Cell>, CellSelector> value) {
+    private CellTreeElement(Either<Holder<Cell>, Either<CellSelector, Pair<Integer, String>>> value) {
         this.value = value;
     }
 
@@ -27,16 +29,31 @@ public class CellTreeElement {
     }
 
     public static CellTreeElement selector(CellSelector selector) {
-        return new CellTreeElement(Either.right(selector));
+        return new CellTreeElement(Either.right(Either.left(selector)));
     }
 
-    public Optional<Holder<Cell>> left() {
+    public Optional<Holder<Cell>> getCell() {
         return this.value.left();
     }
 
-    public Optional<CellSelector> right() {
+    public Optional<CellSelector> getSelector() {
+        return this.value.right().isPresent() ? this.value.right().orElseThrow().left() : Optional.empty();
+    }
+
+    public Optional<Either<CellSelector, Pair<Integer, String>>> getSelectorOrSubtreeKey() {
         return this.value.right();
     }
 
-    public static final MapCodec<CellTreeElement> CODEC = Codec.mapEither(Cell.CODEC.fieldOf("cell"), CellSelector.CODEC.fieldOf("cell_selector")).xmap(CellTreeElement::new, e -> e.value);
+    public Optional<Pair<Integer, String>> getSubtreeKey() {
+        return this.value.right().isPresent() ? this.value.right().orElseThrow().right() : Optional.empty();
+    }
+
+    public static final MapCodec<CellTreeElement> CODEC = Codec.mapEither(
+            Cell.CODEC.fieldOf("cell"),
+            Codec.mapEither(
+                    CellSelector.CODEC.fieldOf("cell_selector"),
+                    Codec.mapPair(
+                            ExtraCodecs.POSITIVE_INT.fieldOf("layer_index"),
+                            Codec.string(1, 32).fieldOf("key")
+                    ).fieldOf("subtree"))).xmap(CellTreeElement::new, e -> e.value);
 }

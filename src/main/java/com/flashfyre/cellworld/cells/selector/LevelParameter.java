@@ -5,6 +5,7 @@ import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 
 import java.util.function.Function;
@@ -45,6 +46,20 @@ public interface LevelParameter {
                 inst -> inst.group(
                         Codec.INT.fieldOf("y").forGetter(Height::y)
                 ).apply(inst, Height::new));
+    }
+
+    record AngleFromXZCoord(int x, int z) implements LevelParameter {
+        public MapCodec<? extends LevelParameter> type() { return Cellworld.DIST_FROM_XZ_COORD.get(); }
+
+        @Override public float get(CellContext ctx) {
+            return (((float) (Math.atan2(this.x - ctx.nucleusBlockX, this.z - ctx.nucleusBlockZ)) + Mth.PI) / Mth.TWO_PI) * 360f;
+        }
+
+        public static final MapCodec<AngleFromXZCoord> CODEC = RecordCodecBuilder.mapCodec(
+                inst -> inst.group(
+                        Codec.INT.optionalFieldOf("x", 0).forGetter(AngleFromXZCoord::x),
+                        Codec.INT.optionalFieldOf("z", 0).forGetter(AngleFromXZCoord::z)
+                ).apply(inst, AngleFromXZCoord::new));
     }
 
     record CellContext(RandomSource rand, int nucleusBlockX, int nucleusBlockY, int nucleusBlockZ) { }

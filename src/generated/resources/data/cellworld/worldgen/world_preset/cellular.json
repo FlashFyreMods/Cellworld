@@ -6,7 +6,7 @@
         "type": "minecraft:noise",
         "biome_source": {
           "type": "cellworld:cellular",
-          "cell_map": "cellworld:nether"
+          "cell_selection_tree": "cellworld:end"
         },
         "settings": "cellworld:flat"
       }

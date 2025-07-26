@@ -2,6 +2,7 @@ package com.flashfyre.cellworld.levelgen;
 
 import com.flashfyre.cellworld.cells.Cell;
 import com.flashfyre.cellworld.cells.CellSelectionTree;
+import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
@@ -14,7 +15,7 @@ public record CellMapRuleSource(Holder<CellSelectionTree> cellMap) implements Su
     public static final MapCodec<CellMapRuleSource> MAP_CODEC =
             RecordCodecBuilder.mapCodec(
                     inst -> inst.group(
-                                    CellSelectionTree.CODEC.fieldOf("cell_map").forGetter(CellMapRuleSource::cellMap)
+                                    CellSelectionTree.CODEC.fieldOf("cell_selection_tree").forGetter(CellMapRuleSource::cellMap)
                             )
                             .apply(inst, CellMapRuleSource::new)
             );

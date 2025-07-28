@@ -165,18 +165,22 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
     public static void bootstrap(BootstrapContext<CellSelectionTree> ctx) {
         HolderGetter<SingleIntConfiguredCell> weightedCellEntries = ctx.lookup(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL);
         HolderGetter<Cell> cells = ctx.lookup(CellworldRegistries.CELL_REGISTRY_KEY);
-        ctx.register(END, new CellSelectionTree(64, new LevelParameterValueSelector(
+        ctx.register(END, new CellSelectionTree(360, new LevelParameterValueSelector(
                 new LevelParameter.DistFromXZCoord(0, 0),
                 List.of(
-                        new Pair<>(1000f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.THE_END)))
+                        new Pair<>(900f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.THE_END))),
+                        new Pair<>(1000f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.SMALL_END_ISLANDS)))
                 ),
                 CellTreeElement.selector(new RandomSelector(List.of(
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.END_HIGHLANDS)),
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS)))))
         ), Optional.of(List.of(
-                new Pair<>(32, Optional.empty()),
-                new Pair<>(16, Optional.empty())
+                new Pair<>(180, Optional.empty()),
+                new Pair<>(90, Optional.empty()),
+                new Pair<>(45, Optional.empty()),
+                new Pair<>(11, Optional.empty()),
+                new Pair<>(5, Optional.empty())
                 )))
         );
 

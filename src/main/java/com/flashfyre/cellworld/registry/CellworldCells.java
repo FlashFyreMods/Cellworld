@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import org.apache.http.cookie.SM;
 
 public class CellworldCells {
     public static final ResourceKey<Cell> NETHER_WASTES = createKey("nether_wastes");
@@ -21,6 +22,7 @@ public class CellworldCells {
     public static final ResourceKey<Cell> GILDED_DEPTHS = createKey("gilded_depths");
 
     public static final ResourceKey<Cell> THE_END = createKey("the_end");
+    public static final ResourceKey<Cell> SMALL_END_ISLANDS = createKey("small_end_islands");
     public static final ResourceKey<Cell> END_HIGHLANDS = createKey("end_highlands");
     public static final ResourceKey<Cell> OBSIDIAN_SPIRES = createKey("obsidian_spires");
     public static final ResourceKey<Cell> AMETHYST_FIELDS = createKey("amethyst_fields");
@@ -35,6 +37,7 @@ public class CellworldCells {
         ctx.register(GILDED_DEPTHS, Cell.withSurfaceRules(biomes, CellworldBiomes.GILDED_DEPTHS, CellworldSurfaceRules.gildedDepths()));
 
         ctx.register(THE_END, Cell.withSurfaceRules(biomes, Biomes.THE_END, CellworldSurfaceRules.END_STONE));
+        ctx.register(SMALL_END_ISLANDS, Cell.withSurfaceRules(biomes, Biomes.SMALL_END_ISLANDS, CellworldSurfaceRules.END_STONE));
         ctx.register(END_HIGHLANDS, Cell.withSurfaceRules(biomes, Biomes.END_HIGHLANDS, CellworldSurfaceRules.END_STONE));
         ctx.register(OBSIDIAN_SPIRES, Cell.withSurfaceRules(biomes, CellworldBiomes.OBSIDIAN_SPIRES, CellworldSurfaceRules.obsidianSpires()));
         ctx.register(AMETHYST_FIELDS, Cell.withSurfaceRules(biomes, CellworldBiomes.AMETHYST_FIELDS, CellworldSurfaceRules.amethystFields()));

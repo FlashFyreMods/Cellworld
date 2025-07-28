@@ -1,6 +1,6 @@
 {
   "first_layer": {
-    "first_layer_scale": 64,
+    "first_layer_scale": 360,
     "selector": {
       "type": "cellworld:level_parameter_value",
       "default_element": {
@@ -22,6 +22,10 @@
       "elements": [
         {
           "cell": "cellworld:the_end",
+          "parameter_value": 900.0
+        },
+        {
+          "cell": "cellworld:small_end_islands",
           "parameter_value": 1000.0
         }
       ],
@@ -32,10 +36,19 @@
   },
   "layers": [
     {
-      "layer_scale": 32
+      "layer_scale": 180
     },
     {
-      "layer_scale": 16
+      "layer_scale": 90
+    },
+    {
+      "layer_scale": 45
+    },
+    {
+      "layer_scale": 11
+    },
+    {
+      "layer_scale": 5
     }
   ]
 }

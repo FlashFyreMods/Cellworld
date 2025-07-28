@@ -1,4 +1,4 @@
-// 1.21.1	2025-07-28T15:12:39.7563949	Registries
+// 1.21.1	2025-07-28T17:20:41.2229662	Registries
 ffdf07b9fa465c8f38f95c9be70ac9b5d6d2612a data/cellworld/cellworld/cell/amethyst_fields.json
 2127fe8d02954e07f2cee618ea6c4f9b28a1bac5 data/cellworld/cellworld/cell/basalt_deltas.json
 789639bf5f0e94e5a513ceccdf5fb3eb68b36a38 data/cellworld/cellworld/cell/crimson_forest.json
@@ -6,10 +6,11 @@ ffdf07b9fa465c8f38f95c9be70ac9b5d6d2612a data/cellworld/cellworld/cell/amethyst_
 a9b221489b5d13acb98bff601ffb868cc7df6de1 data/cellworld/cellworld/cell/gilded_depths.json
 d47b646016db6a6572a289ca86cd7633a1a45917 data/cellworld/cellworld/cell/nether_wastes.json
 66da7b76a203674c6112d9415b926161677311b4 data/cellworld/cellworld/cell/obsidian_spires.json
+2dfac72fd5c56373e4ab75f0ab5d26725265efa3 data/cellworld/cellworld/cell/small_end_islands.json
 85df405cca2aba317224f3f5e96761686b9673e2 data/cellworld/cellworld/cell/soul_sand_valley.json
 b116c96a10942421cb4938c3e54b9ce038c9601f data/cellworld/cellworld/cell/the_end.json
 3559dccd9cc913a42c4b6a3360535889ed0bc0f6 data/cellworld/cellworld/cell/warped_forest.json
-dd6cf60c06020f1f9fd86571a71feec726e19570 data/cellworld/cellworld/cell_selection_tree/end.json
+39b7eb8781e2479662237ab947ce97496d20f06f data/cellworld/cellworld/cell_selection_tree/end.json
 e243d2ab981fa84df01e3dbef69d53ff776e6888 data/cellworld/cellworld/single_int_configured_cell/basalt_deltas_weighted.json
 5ec170f7f3780b9e41aa32ed61b21a9d7c572a57 data/cellworld/cellworld/single_int_configured_cell/crimson_forest_weighted.json
 7c2113e132b46dda66235d8b6e0e61b12edf8cc4 data/cellworld/cellworld/single_int_configured_cell/gilded_depths_weighted.json

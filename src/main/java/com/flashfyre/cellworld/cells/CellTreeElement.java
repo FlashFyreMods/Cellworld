@@ -9,6 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class CellTreeElement {
     /*public static final Codec<CellEntry> CODEC = Codec.recursive(
@@ -30,6 +31,17 @@ public class CellTreeElement {
 
     public static CellTreeElement selector(CellSelector selector) {
         return new CellTreeElement(Either.right(Either.left(selector)));
+    }
+
+    public Stream<Holder<Cell>> stream() {
+        if (this.getCell().isPresent()) {
+            return Stream.of(this.getCell().orElseThrow());
+        }
+        else if(this.getSelector().isPresent()) {
+            return this.getSelector().get().streamCells();
+        } else {
+            return Stream.of();
+        }
     }
 
     public Optional<Holder<Cell>> getCell() {

@@ -26,7 +26,7 @@ public interface LevelParameter {
 
         public MapCodec<? extends LevelParameter> type() { return Cellworld.DIST_FROM_XZ_COORD.get(); }
 
-        @Override public float get(CellContext ctx) { return ctx.nucleusBlockX*ctx.nucleusBlockX + ctx.nucleusBlockZ*ctx.nucleusBlockZ; }
+        @Override public float get(CellContext ctx) { return Mth.square(ctx.nucleusBlockX - this.x) + Mth.square(ctx.nucleusBlockZ - this.z); }
 
         @Override
         public boolean squareParameter() {

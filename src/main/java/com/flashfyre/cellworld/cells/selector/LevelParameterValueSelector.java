@@ -58,13 +58,21 @@ public class LevelParameterValueSelector implements CellSelector {
 
     @Override
     public Stream<Holder<Cell>> streamCells() {
-        return this.cells.stream().flatMap(p -> {
+
+        Stream<Holder<Cell>> defaultStream = this.defaultCell.stream();
+        /*if(this.defaultCell.getCell().isPresent()) {
+            defaultStream = Stream.of(this.defaultCell.getCell().orElseThrow());
+        } else {
+            defaultStream = this.defaultCell.getSelector().orElseThrow().streamCells();
+        }*/
+
+        return Stream.concat(defaultStream, this.cells.stream().flatMap(p -> {
             CellTreeElement element = p.getSecond();
             if(element.getCell().isPresent()) {
                 return Stream.of(element.getCell().orElseThrow());
             } else {
                 return element.getSelector().orElseThrow().streamCells();
             }
-        });
+        }));
     }
 }

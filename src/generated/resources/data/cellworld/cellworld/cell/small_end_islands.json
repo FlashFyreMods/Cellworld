@@ -1,0 +1,9 @@
+{
+  "biome": "minecraft:small_end_islands",
+  "surface_rules": {
+    "type": "minecraft:block",
+    "result_state": {
+      "Name": "minecraft:end_stone"
+    }
+  }
+}

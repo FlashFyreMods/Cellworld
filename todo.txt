@@ -1,5 +1,8 @@
 - Test multi stage cell pickers
 
+- Add small end islands in gaps
+
+
 - Need densityfunction/climate sampler parameters
 - Make cellular cell selector?
 

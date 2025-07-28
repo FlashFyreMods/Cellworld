@@ -29,5 +29,13 @@
         "type": "cellworld:dist_from_xz_coord"
       }
     }
-  }
+  },
+  "layers": [
+    {
+      "layer_scale": 32
+    },
+    {
+      "layer_scale": 16
+    }
+  ]
 }

@@ -95,7 +95,7 @@ public class Cellworld {
                         output,
                         lookupProvider,
                         new RegistrySetBuilder()
-                                .add(Registries.NOISE_SETTINGS, CellworldNoiseSettings::bootstrap)
+                                .add(Registries.NOISE_SETTINGS, CellworldNoiseSettings::cellworldBootstrap)
                                 .add(Registries.WORLD_PRESET, CellworldWorldPresets::bootstrap)
                                 .add(Registries.BIOME, CellworldBiomes::bootstrap)
                                 .add(CellworldRegistries.CELL_REGISTRY_KEY, CellworldCells::bootstrap)

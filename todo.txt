@@ -1,3 +1,19 @@
+- Test multi stage cell pickers
+
+- Need densityfunction/climate sampler parameters
+- Make cellular cell selector?
+
+- Rename cell -> surface configured biome?
+- Work on weighted stuff
+- Make random cells take from tag
+- Add debug boolean that makes cell scales 50x smaller
+
+
+
+
+
+
+
 - Make custom nether noise settings with cell map rulesource
 - Also, make nether biomes bigger
 - Consider adding sample offset

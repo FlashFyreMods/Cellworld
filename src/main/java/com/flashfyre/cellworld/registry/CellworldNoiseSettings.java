@@ -14,17 +14,18 @@ import net.minecraft.world.level.levelgen.*;
 
 import java.util.List;
 
-public class CellworldNoiseSettings {
+public class CellworldNoiseSettings extends NoiseRouterData {
 
     public static final ResourceKey<NoiseGeneratorSettings> FLAT = createKey("flat");
     public static final ResourceKey<NoiseGeneratorSettings> NETHER_CELLULAR = createKey("nether_cellular");
+    public static final ResourceKey<NoiseGeneratorSettings> END_CELLULAR = createKey("end_cellular");
 
     private static ResourceKey<NoiseGeneratorSettings> createKey(String name) {
         return ResourceKey.create(Registries.NOISE_SETTINGS, ResourceLocation.fromNamespaceAndPath(Cellworld.MOD_ID, name));
     }
 
-    public static void bootstrap(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        ctx.register(FLAT, flatEnd(ctx));
+    public static void cellworldBootstrap(BootstrapContext<NoiseGeneratorSettings> ctx) {
+        ctx.register(END_CELLULAR, cellularEnd(ctx));
     }
 
     /*public static NoiseGeneratorSettings flatNether(BootstrapContext<NoiseGeneratorSettings> ctx) {
@@ -44,13 +45,50 @@ public class CellworldNoiseSettings {
         );
     }*/
 
+    public static NoiseGeneratorSettings cellularEnd(BootstrapContext<NoiseGeneratorSettings> ctx) {
+        return new NoiseGeneratorSettings(
+                NoiseSettings.create(0, 128, 2, 1),
+                Blocks.END_STONE.defaultBlockState(),
+                Blocks.AIR.defaultBlockState(),
+                //nether(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
+                end(ctx.lookup(Registries.DENSITY_FUNCTION)),
+                //CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
+                CellworldSurfaceRules.end(ctx),
+                List.of(),
+                0,
+                true,
+                false,
+                false,
+                true
+        );
+    }
+
     public static NoiseGeneratorSettings flatEnd(BootstrapContext<NoiseGeneratorSettings> ctx) {
         return new NoiseGeneratorSettings(
                 NoiseSettings.create(0, 128, 1, 2),
                 Blocks.END_STONE.defaultBlockState(),
                 Blocks.LAVA.defaultBlockState(),
-                //NoiseRouterData.nether(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE)),
-                CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
+                //nether(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
+                end(ctx.lookup(Registries.DENSITY_FUNCTION)),
+                //CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
+                CellworldSurfaceRules.end(ctx),
+                List.of(),
+                32,
+                false,
+                false,
+                false,
+                true
+        );
+    }
+
+    public static NoiseGeneratorSettings flatOverworld(BootstrapContext<NoiseGeneratorSettings> ctx) {
+        return new NoiseGeneratorSettings(
+                NoiseSettings.create(0, 128, 1, 2),
+                Blocks.STONE.defaultBlockState(),
+                Blocks.WATER.defaultBlockState(),
+                //nether(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
+                end(ctx.lookup(Registries.DENSITY_FUNCTION)),
+                //CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
                 CellworldSurfaceRules.end(ctx),
                 List.of(),
                 32,

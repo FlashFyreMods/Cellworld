@@ -21,27 +21,42 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optional<List<Pair<Integer, Map<String, CellTreeElement>>>> layers) {
+public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optional<List<Pair<Integer, Optional<Map<String, CellTreeElement>>>>> layers) {
 
     public CellSelectionTree(int scale, CellSelector selector) {
         this(new Pair<>(scale, selector), Optional.empty());
     }
 
+    public CellSelectionTree(int scale, CellSelector selector, Optional<List<Pair<Integer, Optional<Map<String, CellTreeElement>>>>> layers) {
+        this(new Pair<>(scale, selector), layers);
+    }
+
     public static final Codec<CellSelectionTree> DIRECT_CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
                     Codec.mapPair(Codec.INT.fieldOf("first_layer_scale"), CellSelector.CODEC.fieldOf("selector")).codec().fieldOf("first_layer").forGetter(tree -> tree.initialLayer),
-                    Codec.mapPair(Codec.INT.fieldOf("layer_scale"), Codec.unboundedMap(Codec.string(1, 32), CellTreeElement.CODEC.codec()).fieldOf("element")).codec().listOf().optionalFieldOf("layers").forGetter(cellMap -> cellMap.layers)
+                    Codec.mapPair(Codec.INT.fieldOf("layer_scale"), Codec.unboundedMap(Codec.string(1, 32), CellTreeElement.CODEC.codec()).optionalFieldOf("element")).codec().listOf().optionalFieldOf("layers").forGetter(cellMap -> cellMap.layers)
             ).apply(inst, CellSelectionTree::new)
     );
 
     public static final Codec<Holder<CellSelectionTree>> CODEC = RegistryFileCodec.create(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY, DIRECT_CODEC);
 
     public Cell getCell(int x, int z) {
+
+        /*NormalNoise shift = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(0)), -5, 1.0, 0.5);
+        int multiplier = 15;
+        int xOffset = (int) (shift.getValue(x, 0, z) * multiplier);
+        int zOffset = (int) (shift.getValue(x, 100, z) * multiplier);
+
+        System.out.println("xo: "+xOffset);
+        System.out.println("zo: "+zOffset);*/
+
         return this.resolveCell(this.initialLayer.getSecond(), x, z);
     }
 
@@ -53,7 +68,7 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
             return base;
         }
 
-        Stream<Holder<Cell>> layered = this.layers.orElseThrow().stream().flatMap(p -> p.getSecond().values().stream().flatMap(element -> {
+        Stream<Holder<Cell>> layered = this.layers.orElseThrow().stream().filter(e -> e.getSecond().isPresent()).flatMap(p -> p.getSecond().orElseThrow().values().stream().flatMap(element -> {
                 if (element.getCell().isPresent()) {
                     return Stream.of(element.getCell().orElseThrow());
                 }
@@ -68,7 +83,23 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
     }
 
     private Cell resolveCell(CellSelector selector, int x, int z) {
-        BlockPos nucleusPos = getClosestNucleus(x, z, this.initialLayer.getFirst());
+
+        List<BlockPos> nucleiiPositions = new ArrayList<>();
+        BlockPos nucleusPos = new BlockPos(x, 0, z);
+        if(this.layers.isPresent()) {
+            nucleiiPositions.add(nucleusPos);
+            for(Pair<Integer, Optional<Map<String, CellTreeElement>>> pair : this.layers.orElseThrow().reversed()) { // Iterate from smallest to largest
+                nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), pair.getFirst());
+                nucleiiPositions.add(nucleusPos);
+            }
+        }
+
+        nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.initialLayer.getFirst());
+        nucleiiPositions.add(nucleusPos);
+        nucleiiPositions = nucleiiPositions.reversed(); //now list is from largest to smallest, position 0 being the initial layer
+
+
+
         RandomSource r = new LegacyRandomSource(0);
         r.setSeed(BlockPos.asLong(nucleusPos.getX(), 0, nucleusPos.getZ()));
         LevelParameter.CellContext ctx = new LevelParameter.CellContext(r, nucleusPos.getX(), 0, nucleusPos.getZ());
@@ -80,13 +111,13 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
                 currentElement = currentElement.getSelector().orElseThrow().get(ctx);
             } else { // If the node is a subtree key
                 Pair<Integer, String> subtreeInfo = currentElement.getSubtreeKey().orElseThrow(); // We get the layer and key of the subtree to lookup
-                Pair<Integer, Map<String, CellTreeElement>> layer = this.layers.orElseThrow().get(subtreeInfo.getFirst());
-                currentElement = layer.getSecond().get(subtreeInfo.getSecond()); // We lookup the subtree and update the current element
+                Pair<Integer, Optional<Map<String, CellTreeElement>>> layer = this.layers.orElseThrow().get(subtreeInfo.getFirst());
+                currentElement = layer.getSecond().orElseThrow().get(subtreeInfo.getSecond()); // We lookup the subtree and update the current element
                 int layerIndexDiff = subtreeInfo.getFirst() - currentLayerIndex; // Calculate how many layers we need to sample
-                int layerScale = 0;
+                //int layerScale = 0;
                 for(int i = 0; i<layerIndexDiff; i++) {
-                    layerScale = this.layers.orElseThrow().get(subtreeInfo.getFirst()).getFirst();
-                    nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), layerScale); // Update the nucleus pos that we are now at
+                    //layerScale = this.layers.orElseThrow().get(subtreeInfo.getFirst()).getFirst();
+                    nucleusPos = nucleiiPositions.get(subtreeInfo.getFirst()+1); // Update the nucleus pos that we are now at, to the one sampled earlier
                     r.setSeed(BlockPos.asLong(nucleusPos.getX(), 0, nucleusPos.getZ()));
                     ctx = new LevelParameter.CellContext(r, nucleusPos.getX(), 0, nucleusPos.getZ()); // Update the context
                 }
@@ -143,7 +174,11 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.END_HIGHLANDS)),
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS)))))
-        )));
+        ), Optional.of(List.of(
+                new Pair<>(32, Optional.empty()),
+                new Pair<>(16, Optional.empty())
+                )))
+        );
 
     }
 

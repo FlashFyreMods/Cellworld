@@ -5,8 +5,10 @@ import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import java.util.function.Function;
 
@@ -63,4 +65,17 @@ public interface LevelParameter {
     }
 
     record CellContext(RandomSource rand, int nucleusBlockX, int nucleusBlockY, int nucleusBlockZ) { }
+
+    record DensityFunctionInput(DensityFunction densityFunction) implements LevelParameter {
+        public MapCodec<? extends LevelParameter> type() { return null; }
+
+        @Override public float get(CellContext ctx) {
+            return (float) this.densityFunction.compute(new DensityFunction.SinglePointContext(ctx.nucleusBlockX(), 0, ctx.nucleusBlockZ()));
+        }
+
+        public static final MapCodec<DensityFunctionInput> CODEC = RecordCodecBuilder.mapCodec(
+                inst -> inst.group(
+                        DensityFunction.DIRECT_CODEC.fieldOf("density_function").forGetter(DensityFunctionInput::densityFunction)
+                ).apply(inst, DensityFunctionInput::new));
+    }
 }

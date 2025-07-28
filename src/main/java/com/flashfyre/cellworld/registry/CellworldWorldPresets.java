@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSet;
 import java.util.Map;
 
 public class CellworldWorldPresets {
-    public static final ResourceKey<WorldPreset> CELLULAR = createKey("cellular");
+    public static final ResourceKey<WorldPreset> CELLULAR_END = createKey("cellular_end");
     public static final ResourceKey<WorldPreset> CELLULAR_NETHER = createKey("cellular_nether");
 
     public static void bootstrap(BootstrapContext<WorldPreset> ctx) {
@@ -36,38 +36,10 @@ public class CellworldWorldPresets {
         HolderGetter<CellSelectionTree> cellMaps = ctx.lookup(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY);
 
         BiomeSource fixed = new FixedBiomeSource(biomes.getOrThrow(Biomes.MUSHROOM_FIELDS));
-        /*BiomeSource cellularOverworld = new CellularBiomeSource(new CellMap(List.of(64, 16),
-                CellSelector.randomFromList(
-                        new CellEntry(CellSelector.randomFromList(
-                                new CellEntry(Cell.of(biomes, Biomes.FROZEN_OCEAN)),
-                                new CellEntry(Cell.of(biomes, Biomes.COLD_OCEAN)),
-                                new CellEntry(Cell.of(biomes, Biomes.OCEAN)),
-                                new CellEntry(Cell.of(biomes, Biomes.LUKEWARM_OCEAN)),
-                                new CellEntry(Cell.of(biomes, Biomes.WARM_OCEAN))
-                        )),
-                        new CellEntry(CellSelector.randomFromList(
-                                new CellEntry(Cell.of(biomes, Biomes.DARK_FOREST)),
-                                new CellEntry(Cell.of(biomes, Biomes.PLAINS)),
-                                new CellEntry(Cell.of(biomes, Biomes.FLOWER_FOREST))
-                        )
-                ))));*/
-
-        /*BiomeSource cellularNether = new CellularBiomeSource(new CellMap(List.of(32), CellSelector.randomFromWeightedList(
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.NETHER_WASTES), 100),
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.SOUL_SAND_VALLEY), 95),
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.BASALT_DELTAS), 95),
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.WARPED_FOREST), 90),
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.CRIMSON_FOREST), 90),
-                weightedCellEntries.getOrThrow(RandomFromWeightedList.OCEAN)
-                )));*/
-        /*BiomeSource cellularNether = new CellularBiomeSource(new CellMap(List.of(32), new RandomFromWeightedListHolderSet(HolderSet.direct(
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.NETHER_WASTES), 100),
-                RandomFromWeightedList.entry(Cell.of(biomes, Biomes.OCEAN), 100)
-        ))));*/
         //BiomeSource cellularNether = new CellularBiomeSource(new CellMap(List.of(32), new RandomFromWeightedListHolderSet(weightedCellEntries.getOrThrow(RandomFromWeightedList.WeightedCellEntry.NETHER))));
-        BiomeSource cellularEnd = new CellularBiomeSource(cellMaps.getOrThrow(CellSelectionTree.END));
+        BiomeSource cellularEndBiomeSource = new CellularBiomeSource(cellMaps.getOrThrow(CellSelectionTree.END));
         //registerFlat(ctx, CELLULAR, cellularOverworld, biomes);
-        registerFlatNoiseBased(ctx, CELLULAR, cellularEnd, noiseSettingsGetter);
+        registerCellularEnd(ctx, CELLULAR_END, cellularEndBiomeSource, noiseSettingsGetter);
         //registerNether(ctx, CELLULAR_NETHER, cellularNether, noiseSettingsGetter, biomes);
     }
 
@@ -86,10 +58,15 @@ public class CellworldWorldPresets {
         )));
     }
 
-    public static void registerFlatNoiseBased(BootstrapContext<WorldPreset> ctx, ResourceKey<WorldPreset> presetKey, BiomeSource biomeSource, HolderGetter<NoiseGeneratorSettings> noiseSettingsGetter) {
-        ctx.register(presetKey, new WorldPreset(Map.of(LevelStem.OVERWORLD, new LevelStem(
-                ctx.lookup(Registries.DIMENSION_TYPE).getOrThrow(BuiltinDimensionTypes.OVERWORLD),
-                new NoiseBasedChunkGenerator(biomeSource, noiseSettingsGetter.getOrThrow(CellworldNoiseSettings.FLAT)))
+    public static void registerCellularEnd(BootstrapContext<WorldPreset> ctx, ResourceKey<WorldPreset> presetKey, BiomeSource biomeSource, HolderGetter<NoiseGeneratorSettings> noiseSettingsGetter) {
+        HolderGetter<Biome> biomes = ctx.lookup(Registries.BIOME);
+        ctx.register(presetKey, new WorldPreset(Map.of(
+                LevelStem.OVERWORLD, new LevelStem(
+                    ctx.lookup(Registries.DIMENSION_TYPE).getOrThrow(BuiltinDimensionTypes.OVERWORLD),
+                    new NoiseBasedChunkGenerator(biomeSource, noiseSettingsGetter.getOrThrow(CellworldNoiseSettings.END_CELLULAR))),
+                LevelStem.END, new LevelStem(
+                        ctx.lookup(Registries.DIMENSION_TYPE).getOrThrow(BuiltinDimensionTypes.END),
+                        new NoiseBasedChunkGenerator(biomeSource, noiseSettingsGetter.getOrThrow(CellworldNoiseSettings.END_CELLULAR)))
         )));
     }
 

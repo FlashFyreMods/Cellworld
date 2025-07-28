@@ -46,10 +46,8 @@ public class CellworldSurfaceRules {
         HolderGetter<CellSelectionTree> cellTrees = ctx.lookup(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY);
         SurfaceRules.ConditionSource condition4 = net.minecraft.world.level.levelgen.SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
         return net.minecraft.world.level.levelgen.SurfaceRules.sequence(
-                SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK),
-                SurfaceRules.ifTrue(SurfaceRules.not(SurfaceRules.verticalGradient("bedrock_roof", VerticalAnchor.belowTop(5), VerticalAnchor.top())), BEDROCK),
-                SurfaceRules.ifTrue(condition4, NETHERRACK),
-                new CellMapRuleSource(cellTrees.getOrThrow(CellSelectionTree.END))
+                new CellMapRuleSource(cellTrees.getOrThrow(CellSelectionTree.END)),
+                END_STONE
         );
     }
 

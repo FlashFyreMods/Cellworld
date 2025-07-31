@@ -2,6 +2,7 @@ package com.flashfyre.cellworld.levelgen;
 
 import com.flashfyre.cellworld.cells.CellSelectionTree;
 import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
+import com.flashfyre.cellworld.registry.CellworldNoises;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -27,6 +28,7 @@ public class CellworldSurfaceRules {
     public static final SurfaceRules.RuleSource CRIMSON_NYLIUM = stateRule(Blocks.CRIMSON_NYLIUM);
 
     public static final SurfaceRules.RuleSource OBSIDIAN = stateRule(Blocks.OBSIDIAN);
+    public static final SurfaceRules.RuleSource CRYING_OBSIDIAN = stateRule(Blocks.CRYING_OBSIDIAN);
     public static final SurfaceRules.RuleSource AMETHYST = stateRule(Blocks.AMETHYST_BLOCK);
     public static final SurfaceRules.RuleSource END_STONE = stateRule(Blocks.END_STONE);
 
@@ -177,7 +179,17 @@ public class CellworldSurfaceRules {
     }
 
     public static SurfaceRules.RuleSource obsidianSpires() {
-        return OBSIDIAN;
+        return SurfaceRules.sequence(
+                SurfaceRules.ifTrue(
+                        SurfaceRules.ON_FLOOR,
+                        SurfaceRules.sequence(
+                                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(CellworldNoises.OBSIDIAN_SPIRES_SURFACE, -0.06, -0.015), OBSIDIAN),
+                                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(CellworldNoises.OBSIDIAN_SPIRES_SURFACE, -0.015, 0.015), CRYING_OBSIDIAN),
+                                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(CellworldNoises.OBSIDIAN_SPIRES_SURFACE, 0.015, 0.06), OBSIDIAN)
+                        )
+                ),
+                END_STONE
+        );
     }
 
     public static SurfaceRules.RuleSource amethystFields() {

@@ -1,9 +1,12 @@
-- Test multi stage cell pickers
+- Finish end
+- Make random selector use a tag
+- Make nether
+- Consider expanding weighted
+- Consider making nether 3d
+- Improve data readability
+- Make documentation
 
-- Add small end islands in gaps
 
-
-- Need densityfunction/climate sampler parameters
 - Make cellular cell selector?
 
 - Rename cell -> surface configured biome?

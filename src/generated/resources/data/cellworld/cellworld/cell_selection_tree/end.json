@@ -1,9 +1,42 @@
 {
   "first_layer": {
-    "first_layer_scale": 360,
+    "scale_index": -1,
     "selector": {
       "type": "cellworld:level_parameter_value",
       "default_element": {
+        "subtree": {
+          "key": "land_biomes",
+          "layer_index": 0
+        }
+      },
+      "elements": [
+        {
+          "cell": "cellworld:small_end_islands",
+          "parameter_value": -0.22
+        }
+      ],
+      "level_parameter": {
+        "type": "cellworld:density_function_input",
+        "density_function": {
+          "type": "minecraft:flat_cache",
+          "argument": {
+            "type": "minecraft:end_islands"
+          }
+        }
+      }
+    }
+  },
+  "layer_scales": [
+    360,
+    180,
+    90,
+    45,
+    22,
+    11
+  ],
+  "layers": {
+    "land_biomes": {
+      "element": {
         "cell_selector": {
           "type": "cellworld:random",
           "elements": [
@@ -19,36 +52,7 @@
           ]
         }
       },
-      "elements": [
-        {
-          "cell": "cellworld:the_end",
-          "parameter_value": 900.0
-        },
-        {
-          "cell": "cellworld:small_end_islands",
-          "parameter_value": 1000.0
-        }
-      ],
-      "level_parameter": {
-        "type": "cellworld:dist_from_xz_coord"
-      }
+      "scale_index": 0
     }
-  },
-  "layers": [
-    {
-      "layer_scale": 180
-    },
-    {
-      "layer_scale": 90
-    },
-    {
-      "layer_scale": 45
-    },
-    {
-      "layer_scale": 11
-    },
-    {
-      "layer_scale": 5
-    }
-  ]
+  }
 }

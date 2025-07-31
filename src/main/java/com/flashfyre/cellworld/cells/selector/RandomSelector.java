@@ -35,4 +35,9 @@ public record RandomSelector(List<CellTreeElement> cells) implements CellSelecto
             }
         });
     }
+
+    @Override
+    public List<CellTreeElement> elements() {
+        return this.cells;
+    }
 }

@@ -4,6 +4,7 @@ import com.flashfyre.cellworld.cells.*;
 import com.flashfyre.cellworld.cells.selector.*;
 import com.flashfyre.cellworld.chunkgenerator.BetterFlatLevelSource;
 import com.flashfyre.cellworld.levelgen.CellMapHeightDensityFunction;
+import com.flashfyre.cellworld.levelgen.SeededEndIslandDensityFunction;
 import com.flashfyre.cellworld.registry.*;
 import com.flashfyre.cellworld.levelgen.CellMapRuleSource;
 import com.mojang.serialization.MapCodec;
@@ -12,13 +13,20 @@ import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.*;
 import org.slf4j.Logger;
 
@@ -36,15 +44,19 @@ import java.util.concurrent.CompletableFuture;
 public class Cellworld {
     public static final String MOD_ID = "cellworld";
     private static final Logger LOGGER = LogUtils.getLogger();
+
     public static final DeferredRegister<MapCodec<? extends BiomeSource>> BIOME_SOURCES = DeferredRegister.create(Registries.BIOME_SOURCE, Cellworld.MOD_ID);
     public static final DeferredRegister<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATORS = DeferredRegister.create(Registries.CHUNK_GENERATOR, Cellworld.MOD_ID);
     public static final DeferredRegister<MapCodec<? extends DensityFunction>> DENSITY_FUNCTION_TYPES = DeferredRegister.create(Registries.DENSITY_FUNCTION_TYPE, Cellworld.MOD_ID);
+
 
     public static final DeferredHolder<MapCodec<? extends BiomeSource>, MapCodec<CellularBiomeSource>> CELLULAR = BIOME_SOURCES.register("cellular", () -> CellularBiomeSource.CODEC);
 
     public static final DeferredHolder<MapCodec<? extends ChunkGenerator>, MapCodec<BetterFlatLevelSource>> BETTER_FLAT = CHUNK_GENERATORS.register("cellular", () -> BetterFlatLevelSource.CODEC);
 
-    public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<CellMapHeightDensityFunction>> CELL_MAP_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("cell_map", CellMapHeightDensityFunction.CODEC::codec);
+    //public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<CellMapHeightDensityFunction>> CELL_MAP_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("cell_map", CellMapHeightDensityFunction.CODEC::codec);
+
+    public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<SeededEndIslandDensityFunction>> SEEDED_END_ISLAND_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("seeded_end_islands", SeededEndIslandDensityFunction.CODEC::codec);
 
     public static final DeferredRegister<MapCodec<? extends SurfaceRules.RuleSource>> MATERIAL_RULES = DeferredRegister.create(Registries.MATERIAL_RULE, Cellworld.MOD_ID);
     public static final DeferredHolder<MapCodec<? extends SurfaceRules.RuleSource>, MapCodec<CellMapRuleSource>> CELL_MAP_RULE = MATERIAL_RULES.register("cell_map", () -> CellMapRuleSource.MAP_CODEC);
@@ -59,6 +71,9 @@ public class Cellworld {
             LEVEL_PARAMETER_TYPES.register("height", () -> LevelParameter.Height.CODEC);
     public static final DeferredHolder<MapCodec<? extends LevelParameter>, MapCodec<? extends LevelParameter>> ANGLE_FROM_XZ_COORD =
             LEVEL_PARAMETER_TYPES.register("angle_from_xz_coord", () -> LevelParameter.AngleFromXZCoord.CODEC);
+
+    public static final DeferredHolder<MapCodec<? extends LevelParameter>, MapCodec<? extends LevelParameter>> DENSITY_FUNCTION_INPUT =
+            LEVEL_PARAMETER_TYPES.register("density_function_input", () -> LevelParameter.DensityFunctionInput.CODEC);
 
 
 
@@ -76,7 +91,10 @@ public class Cellworld {
         modBus.addListener(this::registerRegistries);
         modBus.addListener(this::registerDatapackRegistries);
         modBus.addListener(this::gatherData);
+        NeoForge.EVENT_BUS.addListener(this::levelLoad);
+        NeoForge.EVENT_BUS.addListener(this::createLevelSpawn);
         DENSITY_FUNCTION_TYPES.register(modBus);
+        CellworldFeatures.FEATURES.register(modBus);
         BIOME_SOURCES.register(modBus);
         CHUNK_GENERATORS.register(modBus);
         LEVEL_PARAMETER_TYPES.register(modBus);
@@ -84,19 +102,40 @@ public class Cellworld {
         MATERIAL_RULES.register(modBus);
     }
 
+    public void levelLoad(LevelEvent.Load event) {
+        setWorldSeed(event);
+    }
+
+    public void createLevelSpawn(LevelEvent.CreateSpawnPosition event) {
+        //setWorldSeed(event);
+    }
+
+    private void setWorldSeed(LevelEvent event) {
+        if(event.getLevel() instanceof ServerLevel serverLevel) {
+            ChunkGenerator generator = serverLevel.getChunkSource().getGenerator();
+            if(generator instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator) {
+                RandomState state = serverLevel.getChunkSource().chunkMap.randomState();
+                CellworldNoiseWiringHelper wirer = new CellworldNoiseWiringHelper(serverLevel.getSeed(), state, noiseBasedChunkGenerator.generatorSettings().value().useLegacyRandomSource());
+                CellSelectionTree tree = serverLevel.registryAccess().registryOrThrow(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY).get(CellSelectionTree.END);
+                tree.initSeeds(wirer);
+            }
+        }
+    }
+
     public void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
-        PackOutput packOutput = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
-        ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
         generator.addProvider(
                 event.includeServer(),
                 (DataProvider.Factory<DatapackBuiltinEntriesProvider>) output -> new DatapackBuiltinEntriesProvider(
                         output,
                         lookupProvider,
                         new RegistrySetBuilder()
+                                .add(Registries.NOISE, CellworldNoises::bootstrap)
                                 .add(Registries.NOISE_SETTINGS, CellworldNoiseSettings::cellworldBootstrap)
                                 .add(Registries.WORLD_PRESET, CellworldWorldPresets::bootstrap)
+                                .add(Registries.CONFIGURED_FEATURE, CellworldFeatures.Configured::bootstrap)
+                                .add(Registries.PLACED_FEATURE, CellworldFeatures.Placed::bootstrap)
                                 .add(Registries.BIOME, CellworldBiomes::bootstrap)
                                 .add(CellworldRegistries.CELL_REGISTRY_KEY, CellworldCells::bootstrap)
                                 .add(CellworldRegistries.TERRAIN_CONFIGURED_CELL_REGISTRY_KEY, TerrainAugmentedCell::bootstrap)
@@ -115,6 +154,7 @@ public class Cellworld {
     public void registerRegistries(NewRegistryEvent event) {
         event.register(CellworldRegistries.SELECTOR_TYPE_REGISTRY);
         event.register(CellworldRegistries.LEVEL_PARAMETER_TYPE_REGISTRY);
+        //event.register(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY);
     }
 
     /*public static final DeferredRegister<RuleTestType<?>> RULE_TEST_TYPES = DeferredRegister.create(Registries.RULE_TEST, Cellworld.MOD_ID);

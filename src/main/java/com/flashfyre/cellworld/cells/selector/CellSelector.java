@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -20,4 +21,6 @@ public interface CellSelector {
     MapCodec<? extends CellSelector> type();
 
     Stream<Holder<Cell>> streamCells();
+
+    List<CellTreeElement> elements();
 }

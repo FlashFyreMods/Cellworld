@@ -21,6 +21,7 @@ public class CellworldRegistries {
     public static final ResourceKey<Registry<MapCodec<? extends CellSelector>>> SELECTOR_TYPE_REGISTRY_KEY = createKey("selector_types");
     public static final ResourceKey<Registry<MapCodec<? extends LevelParameter>>> LEVEL_PARAMETER_TYPES_REGISTRY_KEY = createKey("value_selector_parameter_types");
 
+    //public static final Registry<CellSelectionTree> CELL_SELECTION_TREE_REGISTRY = new RegistryBuilder<>(CELL_SELECTION_TREE_REGISTRY_KEY).create();
     public static final Registry<MapCodec<? extends CellSelector>> SELECTOR_TYPE_REGISTRY = new RegistryBuilder<>(SELECTOR_TYPE_REGISTRY_KEY).create();
     public static final Registry<MapCodec<? extends LevelParameter>> LEVEL_PARAMETER_TYPE_REGISTRY = new RegistryBuilder<>(LEVEL_PARAMETER_TYPES_REGISTRY_KEY).create();
 

@@ -1,10 +1,12 @@
 package com.flashfyre.cellworld.cells;
 
 import com.flashfyre.cellworld.Cellworld;
+import com.flashfyre.cellworld.CellworldNoiseWiringHelper;
 import com.flashfyre.cellworld.cells.selector.CellSelector;
 import com.flashfyre.cellworld.cells.selector.LevelParameter;
 import com.flashfyre.cellworld.cells.selector.LevelParameterValueSelector;
 import com.flashfyre.cellworld.cells.selector.RandomSelector;
+import com.flashfyre.cellworld.levelgen.SeededEndIslandDensityFunction;
 import com.flashfyre.cellworld.registry.CellworldCells;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.datafixers.util.Pair;
@@ -17,31 +19,27 @@ import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
+import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optional<List<Pair<Integer, Optional<Map<String, CellTreeElement>>>>> layers) {
+public record CellSelectionTree(List<Integer> layerScales, Pair<Integer,CellSelector> initialLayer, Optional<Map<String, Pair<Integer, CellTreeElement>>> layers) {
 
     public CellSelectionTree(int scale, CellSelector selector) {
-        this(new Pair<>(scale, selector), Optional.empty());
-    }
-
-    public CellSelectionTree(int scale, CellSelector selector, Optional<List<Pair<Integer, Optional<Map<String, CellTreeElement>>>>> layers) {
-        this(new Pair<>(scale, selector), layers);
+        this(List.of(scale), new Pair<>(0, selector), Optional.empty());
     }
 
     public static final Codec<CellSelectionTree> DIRECT_CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
-                    Codec.mapPair(Codec.INT.fieldOf("first_layer_scale"), CellSelector.CODEC.fieldOf("selector")).codec().fieldOf("first_layer").forGetter(tree -> tree.initialLayer),
-                    Codec.mapPair(Codec.INT.fieldOf("layer_scale"), Codec.unboundedMap(Codec.string(1, 32), CellTreeElement.CODEC.codec()).optionalFieldOf("element")).codec().listOf().optionalFieldOf("layers").forGetter(cellMap -> cellMap.layers)
+                    ExtraCodecs.POSITIVE_INT.listOf().fieldOf("layer_scales").forGetter(CellSelectionTree::layerScales),
+                    Codec.mapPair(Codec.INT.fieldOf("scale_index"), CellSelector.CODEC.fieldOf("selector")).codec().fieldOf("first_layer").forGetter(tree -> tree.initialLayer),
+                    Codec.unboundedMap(Codec.string(1, 32), Codec.mapPair(Codec.INT.fieldOf("scale_index"), CellTreeElement.CODEC.codec().fieldOf("element")).codec()).optionalFieldOf("layers").forGetter(CellSelectionTree::layers)
+                    //Codec.mapPair(Codec.INT.fieldOf("scale_index"), Codec.unboundedMap(Codec.string(1, 32), CellTreeElement.CODEC.codec()).fieldOf("element")).codec().listOf().optionalFieldOf("layers").forGetter(cellMap -> cellMap.layers)
             ).apply(inst, CellSelectionTree::new)
     );
 
@@ -68,62 +66,78 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
             return base;
         }
 
-        Stream<Holder<Cell>> layered = this.layers.orElseThrow().stream().filter(e -> e.getSecond().isPresent()).flatMap(p -> p.getSecond().orElseThrow().values().stream().flatMap(element -> {
-                if (element.getCell().isPresent()) {
-                    return Stream.of(element.getCell().orElseThrow());
-                }
-                else if(element.getSelector().isPresent()) {
-                    return element.getSelector().get().streamCells();
-                } else {
-                    return Stream.of();
-                }
-        }));
+        Stream<Holder<Cell>> layered = this.layers.orElseThrow().values().stream().flatMap(p -> p.getSecond().stream());
 
         return Stream.concat(base, layered);
     }
 
     private Cell resolveCell(CellSelector selector, int x, int z) {
-
         List<BlockPos> nucleiiPositions = new ArrayList<>();
         BlockPos nucleusPos = new BlockPos(x, 0, z);
+        BlockPos originalBlockPos = new BlockPos(x, 0, z);
         if(this.layers.isPresent()) {
-            nucleiiPositions.add(nucleusPos);
-            for(Pair<Integer, Optional<Map<String, CellTreeElement>>> pair : this.layers.orElseThrow().reversed()) { // Iterate from smallest to largest
-                nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), pair.getFirst());
+            for(int i = this.layerScales.size()-1; i>=0; i--) { // Iterate from smallest to largest
+                nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.get(i));
                 nucleiiPositions.add(nucleusPos);
             }
         }
 
-        nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.initialLayer.getFirst());
-        nucleiiPositions.add(nucleusPos);
-        nucleiiPositions = nucleiiPositions.reversed(); //now list is from largest to smallest, position 0 being the initial layer
+        nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.getFirst());
+        nucleiiPositions.add(nucleusPos); // Now we have a nucleii position for each cell size, to get cell info
+        nucleiiPositions = nucleiiPositions.reversed(); //now list is from largest to smallest
 
+        // If initial layer is set to -1, don't use cellular sampling
+        // If it is postive, start at the specified layer index
+
+        BlockPos seedPos = this.initialLayer.getFirst() < 0 ? originalBlockPos : nucleiiPositions.get(initialLayer.getFirst());
 
 
         RandomSource r = new LegacyRandomSource(0);
-        r.setSeed(BlockPos.asLong(nucleusPos.getX(), 0, nucleusPos.getZ()));
-        LevelParameter.CellContext ctx = new LevelParameter.CellContext(r, nucleusPos.getX(), 0, nucleusPos.getZ());
+        r.setSeed(BlockPos.asLong(seedPos.getX(), 0, seedPos.getZ()));
+        LevelParameter.CellContext ctx = new LevelParameter.CellContext(r, seedPos.getX(), 0, seedPos.getZ());
 
         CellTreeElement currentElement = selector.get(ctx);
-        int currentLayerIndex = -1;
         while (currentElement.getSelectorOrSubtreeKey().isPresent()) { // If the node is a branch
             if(currentElement.getSelector().isPresent()) { // If the node is a selector
                 currentElement = currentElement.getSelector().orElseThrow().get(ctx);
             } else { // If the node is a subtree key
                 Pair<Integer, String> subtreeInfo = currentElement.getSubtreeKey().orElseThrow(); // We get the layer and key of the subtree to lookup
-                Pair<Integer, Optional<Map<String, CellTreeElement>>> layer = this.layers.orElseThrow().get(subtreeInfo.getFirst());
-                currentElement = layer.getSecond().orElseThrow().get(subtreeInfo.getSecond()); // We lookup the subtree and update the current element
-                int layerIndexDiff = subtreeInfo.getFirst() - currentLayerIndex; // Calculate how many layers we need to sample
-                //int layerScale = 0;
-                for(int i = 0; i<layerIndexDiff; i++) {
-                    //layerScale = this.layers.orElseThrow().get(subtreeInfo.getFirst()).getFirst();
-                    nucleusPos = nucleiiPositions.get(subtreeInfo.getFirst()+1); // Update the nucleus pos that we are now at, to the one sampled earlier
-                    r.setSeed(BlockPos.asLong(nucleusPos.getX(), 0, nucleusPos.getZ()));
-                    ctx = new LevelParameter.CellContext(r, nucleusPos.getX(), 0, nucleusPos.getZ()); // Update the context
-                }
+
+                int layerIndex = this.layers.orElseThrow().get(subtreeInfo.getSecond()).getFirst();
+
+                currentElement = this.layers.orElseThrow().get(subtreeInfo.getSecond()).getSecond(); // We lookup the subtree to get its element and update the current element
+
+                seedPos = layerIndex < 0 ? originalBlockPos : nucleiiPositions.get(layerIndex); // Update the nucleus pos that we are now at, to the one sampled earlier
+                r.setSeed(BlockPos.asLong(seedPos.getX(), 0, seedPos.getZ()));
+                ctx = new LevelParameter.CellContext(r, seedPos.getX(), 0, seedPos.getZ()); // Update the context
             }
         }
         return currentElement.getCell().orElseThrow().value();
+    }
+
+    public void initSeeds(CellworldNoiseWiringHelper noiseWirer) {
+        CellTreeElement initialLayerElement = CellTreeElement.selector(this.initialLayer.getSecond());
+        initSeeds(initialLayerElement, noiseWirer);
+        if(this.layers.isPresent()) {
+            for(Pair<Integer, CellTreeElement> p : this.layers.orElseThrow().values()) {
+                initSeeds(p.getSecond(), noiseWirer);
+            }
+        }
+
+    }
+
+    private void initSeeds(CellTreeElement element, CellworldNoiseWiringHelper noiseWirer) {
+        if(element.getSelector().isPresent()) {
+            CellSelector selector = element.getSelector().orElseThrow();
+            if(selector instanceof LevelParameterValueSelector valueSelector) {
+                if(valueSelector.getParameter() instanceof LevelParameter.DensityFunctionInput densityFunctionInput) {
+                    densityFunctionInput.wireNoise(noiseWirer);
+                }
+            }
+            for (CellTreeElement e : selector.elements()) {
+                initSeeds(e, noiseWirer);
+            }
+        }
     }
 
     private static BlockPos getClosestNucleus(int blockX, int blockZ, int cellSize) {
@@ -165,7 +179,7 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
     public static void bootstrap(BootstrapContext<CellSelectionTree> ctx) {
         HolderGetter<SingleIntConfiguredCell> weightedCellEntries = ctx.lookup(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL);
         HolderGetter<Cell> cells = ctx.lookup(CellworldRegistries.CELL_REGISTRY_KEY);
-        ctx.register(END, new CellSelectionTree(360, new LevelParameterValueSelector(
+        /*ctx.register(END, new CellSelectionTree(List.of(360, 180, 90, 45, 22, 11), new Pair<>(0, new LevelParameterValueSelector(
                 new LevelParameter.DistFromXZCoord(0, 0),
                 List.of(
                         new Pair<>(900f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.THE_END))),
@@ -175,14 +189,21 @@ public record CellSelectionTree(Pair<Integer,CellSelector> initialLayer, Optiona
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.END_HIGHLANDS)),
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS)))))
-        ), Optional.of(List.of(
-                new Pair<>(180, Optional.empty()),
-                new Pair<>(90, Optional.empty()),
-                new Pair<>(45, Optional.empty()),
-                new Pair<>(11, Optional.empty()),
-                new Pair<>(5, Optional.empty())
-                )))
-        );
+        )), Optional.empty()));*/
+
+        ctx.register(END, new CellSelectionTree(List.of(360, 180, 90, 45, 22, 11), new Pair<>(-1, new LevelParameterValueSelector(
+                new LevelParameter.DensityFunctionInput(DensityFunctions.flatCache(DensityFunctions.endIslands(0))),
+                List.of(
+                        new Pair<>(-0.22f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.SMALL_END_ISLANDS)))
+                ),
+                CellTreeElement.subtree("land_biomes")
+        )), Optional.of(
+                Map.of("land_biomes", new Pair<>(0, CellTreeElement.selector(new RandomSelector(List.of(
+                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.END_HIGHLANDS)),
+                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
+                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS))
+                )))))
+        )));
 
     }
 

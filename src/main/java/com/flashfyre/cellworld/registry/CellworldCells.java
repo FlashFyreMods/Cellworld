@@ -23,6 +23,8 @@ public class CellworldCells {
 
     public static final ResourceKey<Cell> THE_END = createKey("the_end");
     public static final ResourceKey<Cell> SMALL_END_ISLANDS = createKey("small_end_islands");
+    public static final ResourceKey<Cell> END_BARRENS = createKey("end_barrens");
+    public static final ResourceKey<Cell> END_MIDLANDS = createKey("end_midlands");
     public static final ResourceKey<Cell> END_HIGHLANDS = createKey("end_highlands");
     public static final ResourceKey<Cell> OBSIDIAN_SPIRES = createKey("obsidian_spires");
     public static final ResourceKey<Cell> AMETHYST_FIELDS = createKey("amethyst_fields");
@@ -38,6 +40,8 @@ public class CellworldCells {
 
         ctx.register(THE_END, Cell.withSurfaceRules(biomes, Biomes.THE_END, CellworldSurfaceRules.END_STONE));
         ctx.register(SMALL_END_ISLANDS, Cell.withSurfaceRules(biomes, Biomes.SMALL_END_ISLANDS, CellworldSurfaceRules.END_STONE));
+        ctx.register(END_BARRENS, Cell.withSurfaceRules(biomes, Biomes.END_BARRENS, CellworldSurfaceRules.END_STONE));
+        ctx.register(END_MIDLANDS, Cell.withSurfaceRules(biomes, Biomes.END_MIDLANDS, CellworldSurfaceRules.END_STONE));
         ctx.register(END_HIGHLANDS, Cell.withSurfaceRules(biomes, Biomes.END_HIGHLANDS, CellworldSurfaceRules.END_STONE));
         ctx.register(OBSIDIAN_SPIRES, Cell.withSurfaceRules(biomes, CellworldBiomes.OBSIDIAN_SPIRES, CellworldSurfaceRules.obsidianSpires()));
         ctx.register(AMETHYST_FIELDS, Cell.withSurfaceRules(biomes, CellworldBiomes.AMETHYST_FIELDS, CellworldSurfaceRules.amethystFields()));

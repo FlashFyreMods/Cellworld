@@ -33,6 +33,10 @@ public class CellTreeElement {
         return new CellTreeElement(Either.right(Either.left(selector)));
     }
 
+    public static CellTreeElement subtree(String id) {
+        return new CellTreeElement(Either.right(Either.right(new Pair<>(0, id))));
+    }
+
     public Stream<Holder<Cell>> stream() {
         if (this.getCell().isPresent()) {
             return Stream.of(this.getCell().orElseThrow());
@@ -65,7 +69,7 @@ public class CellTreeElement {
             Codec.mapEither(
                     CellSelector.CODEC.fieldOf("cell_selector"),
                     Codec.mapPair(
-                            ExtraCodecs.POSITIVE_INT.fieldOf("layer_index"),
+                            ExtraCodecs.NON_NEGATIVE_INT.fieldOf("layer_index"),
                             Codec.string(1, 32).fieldOf("key")
                     ).fieldOf("subtree"))).xmap(CellTreeElement::new, e -> e.value);
 }

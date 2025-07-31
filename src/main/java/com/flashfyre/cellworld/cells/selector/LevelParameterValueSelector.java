@@ -41,6 +41,10 @@ public class LevelParameterValueSelector implements CellSelector {
         this(parameter, List.of(cell), defaultCell);
     }
 
+    public LevelParameter getParameter() {
+        return this.parameter;
+    }
+
     @Override
     public CellTreeElement get(LevelParameter.CellContext ctx) {
         for(Pair<Float, CellTreeElement> pair : this.cells) {
@@ -74,5 +78,10 @@ public class LevelParameterValueSelector implements CellSelector {
                 return element.getSelector().orElseThrow().streamCells();
             }
         }));
+    }
+
+    @Override
+    public List<CellTreeElement> elements() {
+        return Stream.concat(this.cells.stream().map(Pair::getSecond), Stream.of(this.defaultCell)).toList();
     }
 }

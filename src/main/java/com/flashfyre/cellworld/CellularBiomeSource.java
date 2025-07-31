@@ -4,6 +4,7 @@ import com.flashfyre.cellworld.cells.CellSelectionTree;
 import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.biome.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,6 @@ public class CellularBiomeSource extends BiomeSource {
 
     @Override
     public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler sampler) {
-        return this.cellSelectionTree.value().getCell(x<<2, z<<2).biome(); // Here, x y and z are QuartPos so we need to divide by 4
+        return this.cellSelectionTree.value().getCell(QuartPos.toBlock(x), QuartPos.toBlock(z)).biome(); // Here, x y and z are QuartPos so we need to divide by 4
     }
 }

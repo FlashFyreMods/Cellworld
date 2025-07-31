@@ -15,20 +15,21 @@ import net.minecraft.core.RegistryCodecs;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.random.WeightedEntry;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public class WeightedRandomSelector implements CellSelector {
     public static final MapCodec<WeightedRandomSelector> CODEC = RecordCodecBuilder.mapCodec(
             inst -> inst.group(Codec.either(
                         RegistryCodecs.homogeneousList(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL),
-                        SimpleWeightedRandomList.wrappedCodec(CellSelector.CODEC)
+                        SimpleWeightedRandomList.wrappedCodec(CellTreeElement.CODEC.codec())
                     ).fieldOf("cellSelector").forGetter(e -> e.cells)
     ).apply(inst, WeightedRandomSelector::new));
 
-    private final Either<HolderSet<SingleIntConfiguredCell>, SimpleWeightedRandomList<CellSelector>> cells;
+    private final Either<HolderSet<SingleIntConfiguredCell>, SimpleWeightedRandomList<CellTreeElement>> cells;
     private SimpleWeightedRandomList<Holder<Cell>> list;
 
-    public WeightedRandomSelector(Either<HolderSet<SingleIntConfiguredCell>, SimpleWeightedRandomList<CellSelector>> cells) {
+    public WeightedRandomSelector(Either<HolderSet<SingleIntConfiguredCell>, SimpleWeightedRandomList<CellTreeElement>> cells) {
         this.cells = cells;
     }
 
@@ -36,7 +37,7 @@ public class WeightedRandomSelector implements CellSelector {
         this(Either.left(cells));
     }
 
-    public WeightedRandomSelector(SimpleWeightedRandomList<CellSelector> cells) {
+    public WeightedRandomSelector(SimpleWeightedRandomList<CellTreeElement> cells) {
         this(Either.right(cells));
     }
 
@@ -44,7 +45,7 @@ public class WeightedRandomSelector implements CellSelector {
     public CellTreeElement get(LevelParameter.CellContext ctx) {
         return this.cells.left().isPresent() ?
                 CellTreeElement.cell(this.list.getRandomValue(ctx.rand()).orElseThrow())
-                : CellTreeElement.selector(this.cells.right().orElseThrow().getRandomValue(ctx.rand()).orElseThrow());
+                : this.cells.right().orElseThrow().getRandomValue(ctx.rand()).orElseThrow();
     }
 
     @Override
@@ -57,7 +58,16 @@ public class WeightedRandomSelector implements CellSelector {
         if(this.cells.left().isPresent()) {
             return this.cells.left().orElseThrow().stream().map(e -> e.value().cell());
         } else {
-            return this.cells.right().orElseThrow().unwrap().stream().flatMap(w -> w.data().streamCells());
+            return this.cells.right().orElseThrow().unwrap().stream().flatMap(w -> w.data().stream());
+        }
+    }
+
+    @Override
+    public List<CellTreeElement> elements() {
+        if(this.cells.left().isPresent()) {
+            return List.of();
+        } else {
+            return this.cells.right().orElseThrow().unwrap().stream().map(e -> e.data()).toList();
         }
     }
 

@@ -38,7 +38,7 @@ public class CellworldBiomes {
         HolderGetter<ConfiguredWorldCarver<?>> configuredCarvers = ctx.lookup(Registries.CONFIGURED_CARVER);
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, configuredCarvers);
         ctx.register(GILDED_DEPTHS, gildedDepths(placedFeatures, configuredCarvers));
-        ctx.register(OBSIDIAN_SPIRES, baseEndBiome(builder));
+        ctx.register(OBSIDIAN_SPIRES, obsidianSpires(placedFeatures, configuredCarvers));
         ctx.register(AMETHYST_FIELDS, baseEndBiome(builder));
     }
 
@@ -80,6 +80,13 @@ public class CellworldBiomes {
                 .mobSpawnSettings(mobspawnsettings)
                 .generationSettings(builder.build())
                 .build();
+    }
+
+    private static Biome obsidianSpires(HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
+                .addFeature(GenerationStep.Decoration.RAW_GENERATION, CellworldFeatures.Placed.OBSIDIAN_SPIRE)
+                .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CellworldFeatures.Placed.CHORUS_PLANT_SPARSE);
+        return baseEndBiome(builder);
     }
 
     private static Biome baseEndBiome(BiomeGenerationSettings.Builder generationSettings) {

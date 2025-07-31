@@ -19,6 +19,10 @@ public record DistToXZCoordFunction(int x, int z) implements DensityFunction.Sim
 
     public static final KeyDispatchDataCodec<DistToXZCoordFunction> CODEC = KeyDispatchDataCodec.of(DATA_CODEC);
 
+    public static DistToXZCoordFunction zero() {
+        return new DistToXZCoordFunction(0, 0);
+    }
+
 
     @Override
     public double compute(FunctionContext ctx) {

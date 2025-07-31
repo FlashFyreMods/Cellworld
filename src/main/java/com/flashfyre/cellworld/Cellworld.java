@@ -5,6 +5,7 @@ import com.flashfyre.cellworld.cells.selector.*;
 import com.flashfyre.cellworld.chunkgenerator.BetterFlatLevelSource;
 import com.flashfyre.cellworld.levelgen.CellMapHeightDensityFunction;
 import com.flashfyre.cellworld.levelgen.SeededEndIslandDensityFunction;
+import com.flashfyre.cellworld.levelgen.densityfunction.DistToXZCoordFunction;
 import com.flashfyre.cellworld.registry.*;
 import com.flashfyre.cellworld.levelgen.CellMapRuleSource;
 import com.mojang.serialization.MapCodec;
@@ -56,7 +57,8 @@ public class Cellworld {
 
     //public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<CellMapHeightDensityFunction>> CELL_MAP_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("cell_map", CellMapHeightDensityFunction.CODEC::codec);
 
-    public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<SeededEndIslandDensityFunction>> SEEDED_END_ISLAND_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("seeded_end_islands", SeededEndIslandDensityFunction.CODEC::codec);
+    //public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<SeededEndIslandDensityFunction>> SEEDED_END_ISLAND_DENSITY_FUNCTION = DENSITY_FUNCTION_TYPES.register("seeded_end_islands", SeededEndIslandDensityFunction.CODEC::codec);
+    public static final DeferredHolder<MapCodec<? extends DensityFunction>, MapCodec<DistToXZCoordFunction>> DIST_TO_XZ_COORD = DENSITY_FUNCTION_TYPES.register("dist_to_xz_coord", DistToXZCoordFunction.CODEC::codec);
 
     public static final DeferredRegister<MapCodec<? extends SurfaceRules.RuleSource>> MATERIAL_RULES = DeferredRegister.create(Registries.MATERIAL_RULE, Cellworld.MOD_ID);
     public static final DeferredHolder<MapCodec<? extends SurfaceRules.RuleSource>, MapCodec<CellMapRuleSource>> CELL_MAP_RULE = MATERIAL_RULES.register("cell_map", () -> CellMapRuleSource.MAP_CODEC);

@@ -6,6 +6,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
@@ -27,6 +29,10 @@ public class CellTreeElement {
 
     public static CellTreeElement cell(Holder<Cell> cell) {
         return new CellTreeElement(Either.left(cell));
+    }
+
+    public static CellTreeElement cell(HolderGetter<Cell> cells, ResourceKey<Cell> cellKey) {
+        return cell(cells.getOrThrow(cellKey));
     }
 
     public static CellTreeElement selector(CellSelector selector) {
@@ -69,7 +75,7 @@ public class CellTreeElement {
             Codec.mapEither(
                     CellSelector.CODEC.fieldOf("cell_selector"),
                     Codec.mapPair(
-                            ExtraCodecs.NON_NEGATIVE_INT.fieldOf("layer_index"),
+                            Codec.INT.fieldOf("layer_index"),
                             Codec.string(1, 32).fieldOf("key")
                     ).fieldOf("subtree"))).xmap(CellTreeElement::new, e -> e.value);
 }

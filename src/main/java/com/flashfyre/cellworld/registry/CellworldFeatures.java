@@ -45,7 +45,7 @@ public class CellworldFeatures {
             register(ctx, GILDED_BLACKSTONE_ORE, Feature.ORE, new OreConfiguration(blackstoneRuleTest, Blocks.GILDED_BLACKSTONE.defaultBlockState(), 7));
             register(ctx, OBSIDIAN_SPIRE, CellworldFeatures.CRYSTAL_CLUSTER.get(), new CrystalClusterFeature.CrystalClusterConfig(
                     UniformInt.of(4, 51), 0.3F,
-                    twoWeighted(Blocks.OBSIDIAN, 4, Blocks.CRYING_OBSIDIAN, 1),
+                    twoWeighted(Blocks.OBSIDIAN, 5, Blocks.CRYING_OBSIDIAN, 1),
                     Optional.empty()));
         }
 

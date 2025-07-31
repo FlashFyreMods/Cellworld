@@ -1,13 +1,16 @@
 package com.flashfyre.cellworld.cells.selector;
 
 import com.flashfyre.cellworld.Cellworld;
+import com.flashfyre.cellworld.CellworldNoiseWiringHelper;
 import com.flashfyre.cellworld.cells.Cell;
 import com.flashfyre.cellworld.cells.CellTreeElement;
+import com.flashfyre.cellworld.levelgen.SquareInput;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -22,35 +25,39 @@ public class LevelParameterValueSelector implements CellSelector {
 
     public static final MapCodec<LevelParameterValueSelector> CODEC = RecordCodecBuilder.mapCodec(
             inst -> inst.group(
-                    LevelParameter.CODEC.fieldOf("level_parameter").forGetter(s -> s.parameter),
+                    DensityFunction.DIRECT_CODEC.fieldOf("density_function").forGetter(s -> s.function),
                     (Codec.mapPair(Codec.FLOAT.fieldOf("parameter_value"), CellTreeElement.CODEC)).codec().listOf().fieldOf("elements").forGetter(s -> s.cells),
                     CellTreeElement.CODEC.fieldOf("default_element").forGetter(s -> s.defaultCell)
             ).apply(inst, LevelParameterValueSelector::new));
 
-    private final LevelParameter parameter;
+    private DensityFunction function;
     private final List<Pair<Float, CellTreeElement>> cells;
     CellTreeElement defaultCell;
 
-    public LevelParameterValueSelector(LevelParameter parameter, List<Pair<Float, CellTreeElement>> cells, CellTreeElement defaultCell) {
-        this.parameter = parameter;
+    public LevelParameterValueSelector(DensityFunction function, List<Pair<Float, CellTreeElement>> cells, CellTreeElement defaultCell) {
+        this.function = function;
         this.cells = cells;
         this.defaultCell = defaultCell;
     }
 
-    public LevelParameterValueSelector(LevelParameter parameter, Pair<Float, CellTreeElement> cell, CellTreeElement defaultCell) {
-        this(parameter, List.of(cell), defaultCell);
+    public LevelParameterValueSelector(DensityFunction function, CellTreeElement cell, float value, CellTreeElement defaultCell) {
+        this(function, List.of(new Pair<>(value, cell)), defaultCell);
     }
 
-    public LevelParameter getParameter() {
-        return this.parameter;
+    public DensityFunction function() {
+        return this.function;
+    }
+
+    public void wireNoise(CellworldNoiseWiringHelper noiseWirer) {
+        this.function = this.function.mapAll(noiseWirer);
     }
 
     @Override
     public CellTreeElement get(LevelParameter.CellContext ctx) {
         for(Pair<Float, CellTreeElement> pair : this.cells) {
             float valueToTest = pair.getFirst();
-            if(this.parameter.squareParameter()) valueToTest *= valueToTest;
-            if(this.parameter.get(ctx) < valueToTest) return pair.getSecond();
+            if(this.function() instanceof SquareInput) valueToTest *= valueToTest;
+            if(this.function().compute(new DensityFunction.SinglePointContext(ctx.nucleusBlockX(), ctx.nucleusBlockY(), ctx.nucleusBlockZ())) < valueToTest) return pair.getSecond();
         }
         return this.defaultCell;
     }

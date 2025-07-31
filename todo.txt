@@ -1,7 +1,11 @@
-- Finish end
-- Make random selector use a tag
+- Finish amethyst fields
+
 - Make nether
+- Finish gilded depths
 - Consider expanding weighted
+
+
+
 - Consider making nether 3d
 - Improve data readability
 - Make documentation

@@ -7,6 +7,7 @@ import com.flashfyre.cellworld.cells.selector.LevelParameter;
 import com.flashfyre.cellworld.cells.selector.LevelParameterValueSelector;
 import com.flashfyre.cellworld.cells.selector.RandomSelector;
 import com.flashfyre.cellworld.levelgen.SeededEndIslandDensityFunction;
+import com.flashfyre.cellworld.levelgen.densityfunction.DistToXZCoordFunction;
 import com.flashfyre.cellworld.registry.CellworldCells;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.datafixers.util.Pair;
@@ -28,10 +29,14 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import java.util.*;
 import java.util.stream.Stream;
 
-public record CellSelectionTree(List<Integer> layerScales, Pair<Integer,CellSelector> initialLayer, Optional<Map<String, Pair<Integer, CellTreeElement>>> layers) {
+public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSelector> initialLayer, Optional<Map<String, Pair<Integer, CellTreeElement>>> layers) {
 
     public CellSelectionTree(int scale, CellSelector selector) {
         this(List.of(scale), new Pair<>(0, selector), Optional.empty());
+    }
+
+    public CellSelectionTree(List<Integer> layerScales, int intialLayerIndex, CellSelector initialLayer, Map<String, Pair<Integer, CellTreeElement>> layers) {
+        this(layerScales, new Pair<>(intialLayerIndex, initialLayer), Optional.of(layers));
     }
 
     public static final Codec<CellSelectionTree> DIRECT_CODEC = RecordCodecBuilder.create(
@@ -58,10 +63,14 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer,CellSele
         return this.resolveCell(this.initialLayer.getSecond(), x, z);
     }
 
+    /**
+     * This method exists to be called by BiomeSource#collectPossibleBiomes
+     * so that all biomes within cells can be collected
+     *
+     * @returns A stream of all cells used in the tree
+     */
     public Stream<Holder<Cell>> streamCells() {
-
         Stream<Holder<Cell>> base = this.initialLayer.getSecond().streamCells();
-
         if(this.layers.isEmpty()) {
             return base;
         }
@@ -130,9 +139,7 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer,CellSele
         if(element.getSelector().isPresent()) {
             CellSelector selector = element.getSelector().orElseThrow();
             if(selector instanceof LevelParameterValueSelector valueSelector) {
-                if(valueSelector.getParameter() instanceof LevelParameter.DensityFunctionInput densityFunctionInput) {
-                    densityFunctionInput.wireNoise(noiseWirer);
-                }
+                valueSelector.wireNoise(noiseWirer);
             }
             for (CellTreeElement e : selector.elements()) {
                 initSeeds(e, noiseWirer);
@@ -191,18 +198,20 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer,CellSele
                         CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS)))))
         )), Optional.empty()));*/
 
-        ctx.register(END, new CellSelectionTree(List.of(360, 180, 90, 45, 22, 11), new Pair<>(-1, new LevelParameterValueSelector(
-                new LevelParameter.DensityFunctionInput(DensityFunctions.flatCache(DensityFunctions.endIslands(0))),
-                List.of(
-                        new Pair<>(-0.22f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.SMALL_END_ISLANDS)))
-                ),
-                CellTreeElement.subtree("land_biomes")
-        )), Optional.of(
-                Map.of("land_biomes", new Pair<>(0, CellTreeElement.selector(new RandomSelector(List.of(
-                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.END_HIGHLANDS)),
-                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
-                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS))
-                )))))
+        ctx.register(END, new CellSelectionTree(
+                List.of(360, 180, 90, 45, 22, 11),
+                -1, new LevelParameterValueSelector(
+                        DistToXZCoordFunction.zero(),
+                        CellTreeElement.cell(cells, CellworldCells.THE_END), 850f,
+                        CellTreeElement.selector(new LevelParameterValueSelector(
+                            DensityFunctions.flatCache(DensityFunctions.endIslands(0)),
+                            CellTreeElement.cell(cells, CellworldCells.SMALL_END_ISLANDS), -0.3f,
+                            CellTreeElement.subtree("land_biomes")
+        ))), Map.of("land_biomes", new Pair<>(0, CellTreeElement.selector(new LevelParameterValueSelector(
+                DistToXZCoordFunction.zero(),
+                CellTreeElement.cell(cells, CellworldCells.END_HIGHLANDS), 1500f,
+                CellTreeElement.selector(new RandomSelector(cells.getOrThrow(Cell.OUTER_END))))
+                ))
         )));
 
     }

@@ -3,7 +3,7 @@
   "config": {
     "height": {
       "type": "minecraft:uniform",
-      "max_inclusive": 50,
+      "max_inclusive": 51,
       "min_inclusive": 4
     },
     "main_state_provider": {
@@ -13,22 +13,16 @@
           "data": {
             "Name": "minecraft:obsidian"
           },
-          "weight": 10
+          "weight": 5
         },
         {
           "data": {
             "Name": "minecraft:crying_obsidian"
           },
-          "weight": 3
+          "weight": 1
         }
       ]
     },
-    "relative_radius_variation": 0.3,
-    "top_state_provider": {
-      "type": "minecraft:simple_state_provider",
-      "state": {
-        "Name": "minecraft:obsidian"
-      }
-    }
+    "relative_radius_variation": 0.3
   }
 }

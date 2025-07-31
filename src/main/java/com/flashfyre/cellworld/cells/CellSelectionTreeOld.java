@@ -110,7 +110,7 @@ public record CellSelectionTreeOld(List<Integer> layerScales, CellSelector cellS
         HolderGetter<SingleIntConfiguredCell> weightedCellEntries = ctx.lookup(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL);
         HolderGetter<Cell> cells = ctx.lookup(CellworldRegistries.CELL_REGISTRY_KEY);
         //ctx.register(NETHER, new CellMap(List.of(64, 32, 16), new WeightedRandomSelector(weightedCellEntries.getOrThrow(SingleIntConfiguredCell.NETHER))));
-        ctx.register(NETHER, new CellSelectionTreeOld(List.of(32), new LevelParameterValueSelector(
+        /*ctx.register(NETHER, new CellSelectionTreeOld(List.of(32), new LevelParameterValueSelector(
                 new LevelParameter.DistFromXZCoord(0, 0),
                 List.of(
                     new Pair<>(100f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.BASALT_DELTAS))),
@@ -122,7 +122,7 @@ public record CellSelectionTreeOld(List<Integer> layerScales, CellSelector cellS
                                 CellTreeElement.cell(cells.getOrThrow(CellworldCells.GILDED_DEPTHS))))))
                 ),
                 CellTreeElement.cell(cells.getOrThrow(CellworldCells.NETHER_WASTES))
-        )));
+        )));*/
     }
 
 

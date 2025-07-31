@@ -1,5 +1,6 @@
 package com.flashfyre.cellworld.cells;
 
+import com.flashfyre.cellworld.Cellworld;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,12 +8,14 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 
 import java.util.Optional;
 
-public class Cell {
+public class Cell implements ICellTreeElement {
     private final Holder<Biome> biome;
     private final Optional<SurfaceRules.RuleSource> opt;
 
@@ -46,4 +49,10 @@ public class Cell {
     public Holder<Biome> biome() { return this.biome; }
 
     public Optional<SurfaceRules.RuleSource> ruleSource() { return this.opt; }
+
+    public static final TagKey<Cell> OUTER_END = create("outer_end");
+
+    private static TagKey<Cell> create(String name) {
+        return TagKey.create(CellworldRegistries.CELL_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(Cellworld.MOD_ID, name));
+    }
 }

@@ -4,26 +4,37 @@
     "selector": {
       "type": "cellworld:level_parameter_value",
       "default_element": {
-        "subtree": {
-          "key": "land_biomes",
-          "layer_index": 0
+        "cell_selector": {
+          "type": "cellworld:level_parameter_value",
+          "default_element": {
+            "subtree": {
+              "key": "land_biomes",
+              "layer_index": 0
+            }
+          },
+          "density_function": {
+            "type": "minecraft:flat_cache",
+            "argument": {
+              "type": "minecraft:end_islands"
+            }
+          },
+          "elements": [
+            {
+              "cell": "cellworld:small_end_islands",
+              "parameter_value": -0.3
+            }
+          ]
         }
+      },
+      "density_function": {
+        "type": "cellworld:dist_to_xz_coord"
       },
       "elements": [
         {
-          "cell": "cellworld:small_end_islands",
-          "parameter_value": -0.22
+          "cell": "cellworld:the_end",
+          "parameter_value": 850.0
         }
-      ],
-      "level_parameter": {
-        "type": "cellworld:density_function_input",
-        "density_function": {
-          "type": "minecraft:flat_cache",
-          "argument": {
-            "type": "minecraft:end_islands"
-          }
-        }
-      }
+      ]
     }
   },
   "layer_scales": [
@@ -38,16 +49,20 @@
     "land_biomes": {
       "element": {
         "cell_selector": {
-          "type": "cellworld:random",
+          "type": "cellworld:level_parameter_value",
+          "default_element": {
+            "cell_selector": {
+              "type": "cellworld:random",
+              "holder_set": "#cellworld:outer_end"
+            }
+          },
+          "density_function": {
+            "type": "cellworld:dist_to_xz_coord"
+          },
           "elements": [
             {
-              "cell": "cellworld:end_highlands"
-            },
-            {
-              "cell": "cellworld:obsidian_spires"
-            },
-            {
-              "cell": "cellworld:amethyst_fields"
+              "cell": "cellworld:end_highlands",
+              "parameter_value": 1500.0
             }
           ]
         }

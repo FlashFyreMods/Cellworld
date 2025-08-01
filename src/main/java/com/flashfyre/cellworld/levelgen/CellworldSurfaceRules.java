@@ -1,7 +1,6 @@
 package com.flashfyre.cellworld.levelgen;
 
 import com.flashfyre.cellworld.cells.CellSelectionTree;
-import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.flashfyre.cellworld.registry.CellworldNoises;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import net.minecraft.core.HolderGetter;
@@ -33,20 +32,19 @@ public class CellworldSurfaceRules {
     public static final SurfaceRules.RuleSource END_STONE = stateRule(Blocks.END_STONE);
 
 
-    /*public static SurfaceRules.RuleSource nether(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        HolderGetter<CellSelectionTreeOld> cellMaps = ctx.lookup(CellworldRegistries.CELL_MAP_REGISTRY_KEY);
+    public static SurfaceRules.RuleSource nether(BootstrapContext<NoiseGeneratorSettings> ctx) {
+        HolderGetter<CellSelectionTree> cellMaps = ctx.lookup(CellworldRegistries.CELL_SELECTION_TREE_REG_KEY);
         SurfaceRules.ConditionSource condition4 = net.minecraft.world.level.levelgen.SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
         return net.minecraft.world.level.levelgen.SurfaceRules.sequence(
                 SurfaceRules.ifTrue(SurfaceRules.verticalGradient("bedrock_floor", VerticalAnchor.bottom(), VerticalAnchor.aboveBottom(5)), BEDROCK),
                 SurfaceRules.ifTrue(SurfaceRules.not(SurfaceRules.verticalGradient("bedrock_roof", VerticalAnchor.belowTop(5), VerticalAnchor.top())), BEDROCK),
                 SurfaceRules.ifTrue(condition4, NETHERRACK),
-                new CellMapRuleSource(cellMaps.getOrThrow(CellSelectionTreeOld.NETHER))
+                new CellMapRuleSource(cellMaps.getOrThrow(CellSelectionTree.NETHER))
         );
-    }*/
+    }
 
     public static SurfaceRules.RuleSource end(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        HolderGetter<CellSelectionTree> cellTrees = ctx.lookup(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY);
-        SurfaceRules.ConditionSource condition4 = net.minecraft.world.level.levelgen.SurfaceRules.yBlockCheck(VerticalAnchor.belowTop(5), 0);
+        HolderGetter<CellSelectionTree> cellTrees = ctx.lookup(CellworldRegistries.CELL_SELECTION_TREE_REG_KEY);
         return net.minecraft.world.level.levelgen.SurfaceRules.sequence(
                 new CellMapRuleSource(cellTrees.getOrThrow(CellSelectionTree.END)),
                 END_STONE
@@ -174,6 +172,35 @@ public class CellworldSurfaceRules {
                         SurfaceRules.ON_FLOOR,
                         SurfaceRules.ifTrue(SurfaceRules.not(aboveY32), SurfaceRules.ifTrue(isHole, LAVA))
                 ),
+                SurfaceRules.ifTrue(
+                        SurfaceRules.UNDER_FLOOR,
+                        SurfaceRules.ifTrue(
+                                noiseSoulSand,
+                                SurfaceRules.sequence(
+                                        SurfaceRules.ifTrue(
+                                                SurfaceRules.not(isHole),
+                                                SurfaceRules.ifTrue(aboveY30checked, SurfaceRules.ifTrue(belowY35checked, SOUL_SAND))
+                                        ),
+                                        BLACKSTONE
+                                )
+                        )
+                ),
+                SurfaceRules.ifTrue(
+                        SurfaceRules.ON_FLOOR,
+                        SurfaceRules.ifTrue(
+                                aboveY31,
+                                SurfaceRules.ifTrue(
+                                        belowY35checked,
+                                        SurfaceRules.ifTrue(
+                                                noiseGravel,
+                                                SurfaceRules.sequence(
+                                                        SurfaceRules.ifTrue(aboveY32, GRAVEL),
+                                                        SurfaceRules.ifTrue(SurfaceRules.not(isHole), GRAVEL)
+                                                )
+                                        )
+                                )
+                        )
+                ),
                 BLACKSTONE
         );
     }
@@ -193,7 +220,16 @@ public class CellworldSurfaceRules {
     }
 
     public static SurfaceRules.RuleSource amethystFields() {
-        return AMETHYST;
+        return SurfaceRules.sequence(
+                SurfaceRules.ifTrue(
+                        SurfaceRules.ON_FLOOR,
+                        SurfaceRules.sequence(
+                                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(CellworldNoises.AMETHYST_FIELDS_SURFACE, -1.0, -0.85), AMETHYST),
+                                SurfaceRules.ifTrue(SurfaceRules.noiseCondition(CellworldNoises.AMETHYST_FIELDS_SURFACE, 0.85, 1.0), AMETHYST)
+                        )
+                ),
+                END_STONE
+        );
     }
 
     public static SurfaceRules.RuleSource stateRule(Block block) {

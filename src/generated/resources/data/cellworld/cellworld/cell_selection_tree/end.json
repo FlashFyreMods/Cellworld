@@ -2,23 +2,26 @@
   "first_layer": {
     "scale_index": -1,
     "selector": {
-      "type": "cellworld:level_parameter_value",
-      "default_element": {
+      "type": "cellworld:function_value",
+      "density_function": {
+        "type": "cellworld:dist_to_xz_coord"
+      },
+      "else": {
         "cell_selector": {
-          "type": "cellworld:level_parameter_value",
-          "default_element": {
-            "subtree": {
-              "key": "land_biomes",
-              "layer_index": 0
-            }
-          },
+          "type": "cellworld:function_value",
           "density_function": {
             "type": "minecraft:flat_cache",
             "argument": {
               "type": "minecraft:end_islands"
             }
           },
-          "elements": [
+          "else": {
+            "subtree": {
+              "key": "land_biomes",
+              "layer_index": 0
+            }
+          },
+          "entries": [
             {
               "cell": "cellworld:small_end_islands",
               "parameter_value": -0.3
@@ -26,10 +29,7 @@
           ]
         }
       },
-      "density_function": {
-        "type": "cellworld:dist_to_xz_coord"
-      },
-      "elements": [
+      "entries": [
         {
           "cell": "cellworld:the_end",
           "parameter_value": 850.0
@@ -49,17 +49,17 @@
     "land_biomes": {
       "element": {
         "cell_selector": {
-          "type": "cellworld:level_parameter_value",
-          "default_element": {
-            "cell_selector": {
-              "type": "cellworld:random",
-              "holder_set": "#cellworld:outer_end"
-            }
-          },
+          "type": "cellworld:function_value",
           "density_function": {
             "type": "cellworld:dist_to_xz_coord"
           },
-          "elements": [
+          "else": {
+            "cell_selector": {
+              "type": "cellworld:weighted_random",
+              "entries": "#cellworld:outer_end"
+            }
+          },
+          "entries": [
             {
               "cell": "cellworld:end_highlands",
               "parameter_value": 1500.0

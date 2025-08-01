@@ -1,9 +1,0 @@
-{
-  "biome": "cellworld:amethyst_fields",
-  "surface_rules": {
-    "type": "minecraft:block",
-    "result_state": {
-      "Name": "minecraft:amethyst_block"
-    }
-  }
-}

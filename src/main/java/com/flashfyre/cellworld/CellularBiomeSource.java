@@ -1,7 +1,6 @@
 package com.flashfyre.cellworld;
 
 import com.flashfyre.cellworld.cells.CellSelectionTree;
-import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;

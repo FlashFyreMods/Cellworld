@@ -10,9 +10,11 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 public class CellworldNoises {
 
     public static final ResourceKey<NormalNoise.NoiseParameters> OBSIDIAN_SPIRES_SURFACE = createKey("obsidian_spires_surface");
+    public static final ResourceKey<NormalNoise.NoiseParameters> AMETHYST_FIELDS_SURFACE = createKey("amethyst_fields_surface");
 
     public static void bootstrap(BootstrapContext<NormalNoise.NoiseParameters> ctx) {
         register(ctx, OBSIDIAN_SPIRES_SURFACE, -6, 1.0, 1.0, 2.0, 2.0, 3.0);
+        register(ctx, AMETHYST_FIELDS_SURFACE, -3, 1.0, 2.0, 1.0);
     }
 
     private static void register(

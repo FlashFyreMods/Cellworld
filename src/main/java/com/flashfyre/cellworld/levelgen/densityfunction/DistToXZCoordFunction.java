@@ -1,14 +1,11 @@
 package com.flashfyre.cellworld.levelgen.densityfunction;
 
-import com.flashfyre.cellworld.cells.selector.LevelParameter;
-import com.flashfyre.cellworld.levelgen.SquareInput;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.KeyDispatchDataCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.DensityFunction;
-import net.minecraft.world.level.levelgen.DensityFunctions;
 
 public record DistToXZCoordFunction(int x, int z) implements DensityFunction.SimpleFunction, SquareInput {
     public static final MapCodec<DistToXZCoordFunction> DATA_CODEC = RecordCodecBuilder.mapCodec(

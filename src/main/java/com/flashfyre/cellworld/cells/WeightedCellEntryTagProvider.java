@@ -9,14 +9,14 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
 
-public class WeightedCellEntryTagProvider extends TagsProvider<SingleIntConfiguredCell>{
+public class WeightedCellEntryTagProvider extends TagsProvider<WeightedSurfacedBiome>{
     public WeightedCellEntryTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {
-        super(output, CellworldRegistries.SINGLE_INT_CONFIGURED_CELL, lookupProvider, Cellworld.MOD_ID, existingFileHelper);
+        super(output, CellworldRegistries.WEIGHTED_SURFACED_BIOME_REG_KEY, lookupProvider, Cellworld.MOD_ID, existingFileHelper);
     }
 
     @Override
     protected void addTags(HolderLookup.Provider lookupProvider) {
-        tag(SingleIntConfiguredCell.NETHER).add(SingleIntConfiguredCell.BASALT_DELTAS, SingleIntConfiguredCell.CRIMSON_FOREST);
+        tag(WeightedSurfacedBiome.NETHER).add(WeightedSurfacedBiome.BASALT_DELTAS, WeightedSurfacedBiome.CRIMSON_FOREST);
     }
 
 }

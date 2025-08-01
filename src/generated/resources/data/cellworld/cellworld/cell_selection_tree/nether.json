@@ -1,0 +1,17 @@
+{
+  "first_layer": {
+    "scale_index": 0,
+    "selector": {
+      "type": "cellworld:weighted_random",
+      "entries": "#cellworld:nether"
+    }
+  },
+  "layer_scales": [
+    240,
+    120,
+    60,
+    30,
+    15,
+    7
+  ]
+}

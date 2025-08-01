@@ -1,6 +1,5 @@
 package com.flashfyre.cellworld;
 
-import com.flashfyre.cellworld.levelgen.SeededEndIslandDensityFunction;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -67,7 +66,7 @@ public class CellworldNoiseWiringHelper implements DensityFunction.Visitor {
         } else {
             return (DensityFunction) (densityFunction instanceof DensityFunctions.EndIslandDensityFunction
                     ? new DensityFunctions.EndIslandDensityFunction(this.levelSeed)
-                    : densityFunction instanceof SeededEndIslandDensityFunction ? new SeededEndIslandDensityFunction(this.levelSeed) : densityFunction);
+                    : densityFunction);
         }
     }
 

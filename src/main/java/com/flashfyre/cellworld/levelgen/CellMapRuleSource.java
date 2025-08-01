@@ -1,8 +1,7 @@
 package com.flashfyre.cellworld.levelgen;
 
-import com.flashfyre.cellworld.cells.Cell;
+import com.flashfyre.cellworld.cells.SurfacedBiome;
 import com.flashfyre.cellworld.cells.CellSelectionTree;
-import com.flashfyre.cellworld.cells.CellSelectionTreeOld;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
@@ -34,7 +33,7 @@ public record CellMapRuleSource(Holder<CellSelectionTree> cellMap) implements Su
     record CellMapRule(CellSelectionTree cellMap, SurfaceRules.Context ctx) implements SurfaceRules.SurfaceRule {
         @Override
         public @Nullable BlockState tryApply(int x, int y, int z) {
-            Cell cell = this.cellMap.getCell(x, z);
+            SurfacedBiome cell = this.cellMap.getCell(x, z);
             return cell.ruleSource().isPresent() ? cell.ruleSource().orElseThrow().apply(this.ctx()).tryApply(x, y, z) : null;
         }
     }

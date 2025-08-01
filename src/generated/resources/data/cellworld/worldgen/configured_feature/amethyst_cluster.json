@@ -1,0 +1,28 @@
+{
+  "type": "cellworld:crystal_cluster",
+  "config": {
+    "height": {
+      "type": "minecraft:uniform",
+      "max_inclusive": 7,
+      "min_inclusive": 3
+    },
+    "main_state_provider": {
+      "type": "minecraft:weighted_state_provider",
+      "entries": [
+        {
+          "data": {
+            "Name": "minecraft:amethyst_block"
+          },
+          "weight": 5
+        },
+        {
+          "data": {
+            "Name": "minecraft:budding_amethyst"
+          },
+          "weight": 1
+        }
+      ]
+    },
+    "relative_radius_variation": 0.2
+  }
+}

@@ -1,7 +1,8 @@
 package com.flashfyre.cellworld.cells.selector;
 
 import com.flashfyre.cellworld.Cellworld;
-import com.flashfyre.cellworld.cells.Cell;
+import com.flashfyre.cellworld.cells.SurfacedBiome;
+import com.flashfyre.cellworld.cells.CellSelectionTree;
 import com.flashfyre.cellworld.cells.CellTreeElement;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.serialization.MapCodec;
@@ -9,14 +10,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
-import org.lwjgl.stb.STBEasyFont;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record RandomSelector(HolderSet<Cell> cells) implements CellSelector {
+/**
+ * Selector that picks entries from a SurfacedBiome HolderSet.
+ * @param entries The HolderSet
+ */
+public record RandomSelector(HolderSet<SurfacedBiome> entries) implements CellSelector {
 
     /*public RandomSelector(CellTreeElement firstElement, CellTreeElement... elements) {
         this(Stream.concat(Stream.of(firstElement), Arrays.stream(elements)).collect(Collectors.toList()));
@@ -25,12 +27,12 @@ public record RandomSelector(HolderSet<Cell> cells) implements CellSelector {
     // RegistryCodecs.homogeneousList(CellworldRegistries.CELL_REGISTRY_KEY)
 
     public static final MapCodec<RandomSelector> CODEC = RecordCodecBuilder.mapCodec(
-            inst -> inst.group(RegistryCodecs.homogeneousList(CellworldRegistries.CELL_REGISTRY_KEY).fieldOf("holder_set").forGetter(e -> e.cells)
+            inst -> inst.group(RegistryCodecs.homogeneousList(CellworldRegistries.SURFACED_BIOME_REG_KEY).fieldOf("holder_set").forGetter(e -> e.entries)
             ).apply(inst, RandomSelector::new));
 
     @Override
-    public CellTreeElement get(LevelParameter.CellContext ctx) {
-        return CellTreeElement.cell(this.cells.getRandomElement(ctx.rand()).orElseThrow());
+    public CellTreeElement get(CellSelectionTree.PositionalContext ctx) {
+        return CellTreeElement.cell(this.entries.getRandomElement(ctx.rand()).orElseThrow());
     }
 
     @Override
@@ -39,19 +41,19 @@ public record RandomSelector(HolderSet<Cell> cells) implements CellSelector {
     }
 
     @Override
-    public Stream<Holder<Cell>> streamCells() {
-        /*return cells.stream().flatMap(e -> {
+    public Stream<Holder<SurfacedBiome>> streamCells() {
+        /*return entries.stream().flatMap(e -> {
             if(e.getCell().isPresent()) {
                 return Stream.of(e.getCell().orElseThrow());
             } else {
                 return e.getSelector().orElseThrow().streamCells();
             }
         });*/
-        return this.cells.stream();
+        return this.entries.stream();
     }
 
     @Override
     public List<CellTreeElement> elements() {
-        return this.cells.stream().map(CellTreeElement::cell).toList();
+        return this.entries.stream().map(CellTreeElement::cell).toList();
     }
 }

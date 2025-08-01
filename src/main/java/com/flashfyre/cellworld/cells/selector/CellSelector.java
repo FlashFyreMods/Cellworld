@@ -1,6 +1,7 @@
 package com.flashfyre.cellworld.cells.selector;
 
-import com.flashfyre.cellworld.cells.Cell;
+import com.flashfyre.cellworld.cells.SurfacedBiome;
+import com.flashfyre.cellworld.cells.CellSelectionTree;
 import com.flashfyre.cellworld.cells.CellTreeElement;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.serialization.Codec;
@@ -16,11 +17,11 @@ public interface CellSelector {
             .byNameCodec()
             .dispatch("type", CellSelector::type, Function.identity());
 
-    CellTreeElement get(LevelParameter.CellContext ctx);
+    CellTreeElement get(CellSelectionTree.PositionalContext ctx);
 
     MapCodec<? extends CellSelector> type();
 
-    Stream<Holder<Cell>> streamCells();
+    Stream<Holder<SurfacedBiome>> streamCells();
 
     List<CellTreeElement> elements();
 }

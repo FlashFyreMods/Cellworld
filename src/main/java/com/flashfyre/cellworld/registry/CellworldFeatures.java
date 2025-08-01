@@ -38,14 +38,21 @@ public class CellworldFeatures {
 
     public static class Configured {
         public static final ResourceKey<ConfiguredFeature<?,?>> GILDED_BLACKSTONE_ORE = createKey("gilded_blackstone_ore");
+        public static final ResourceKey<ConfiguredFeature<?,?>> RAW_GOLD_ORE = createKey("raw_gold_ore");
         public static final ResourceKey<ConfiguredFeature<?,?>> OBSIDIAN_SPIRE = createKey("obsidian_spire");
+        public static final ResourceKey<ConfiguredFeature<?,?>> AMETHYST_CLUSTER = createKey("amethyst_cluster");
 
         public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> ctx) {
             RuleTest blackstoneRuleTest = new BlockMatchTest(Blocks.BLACKSTONE);
             register(ctx, GILDED_BLACKSTONE_ORE, Feature.ORE, new OreConfiguration(blackstoneRuleTest, Blocks.GILDED_BLACKSTONE.defaultBlockState(), 7));
+            register(ctx, RAW_GOLD_ORE, Feature.ORE, new OreConfiguration(blackstoneRuleTest, Blocks.RAW_GOLD_BLOCK.defaultBlockState(), 3));
             register(ctx, OBSIDIAN_SPIRE, CellworldFeatures.CRYSTAL_CLUSTER.get(), new CrystalClusterFeature.CrystalClusterConfig(
                     UniformInt.of(4, 51), 0.3F,
                     twoWeighted(Blocks.OBSIDIAN, 5, Blocks.CRYING_OBSIDIAN, 1),
+                    Optional.empty()));
+            register(ctx, AMETHYST_CLUSTER, CellworldFeatures.CRYSTAL_CLUSTER.get(), new CrystalClusterFeature.CrystalClusterConfig(
+                    UniformInt.of(3, 7), 0.2F,
+                    twoWeighted(Blocks.AMETHYST_BLOCK, 5, Blocks.BUDDING_AMETHYST, 1),
                     Optional.empty()));
         }
 
@@ -59,13 +66,16 @@ public class CellworldFeatures {
     }
     public static class Placed {
         public static final ResourceKey<PlacedFeature> GILDED_BLACKSTONE_ORE = createKey("gilded_blackstone_ore");
+        public static final ResourceKey<PlacedFeature> RAW_GOLD_ORE = createKey("raw_gold_ore");
         public static final ResourceKey<PlacedFeature> OBSIDIAN_SPIRE = createKey("obsidian_spire");
+        public static final ResourceKey<PlacedFeature> AMETHYST_CLUSTER = createKey("amethyst_cluster");
         public static final ResourceKey<PlacedFeature> CHORUS_PLANT_SPARSE = createKey("chorus_plant_sparse");
 
         public static void bootstrap(BootstrapContext<PlacedFeature> ctx) {
-            //register(ctx, GILDED_BLACKSTONE_ORE, Configured.GILDED_BLACKSTONE_ORE, List.of()); // Add this
-
+            register(ctx, GILDED_BLACKSTONE_ORE, Configured.GILDED_BLACKSTONE_ORE, commonOre(90, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT));
+            register(ctx, RAW_GOLD_ORE, Configured.RAW_GOLD_ORE, commonOre(25, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT));
             register(ctx, OBSIDIAN_SPIRE, Configured.OBSIDIAN_SPIRE, commonSurface(1, PlacementUtils.HEIGHTMAP));
+            register(ctx, AMETHYST_CLUSTER, Configured.AMETHYST_CLUSTER, commonSurface(2, PlacementUtils.HEIGHTMAP));
             register(ctx, CHORUS_PLANT_SPARSE, EndFeatures.CHORUS_PLANT, rareSurface(2, PlacementUtils.HEIGHTMAP));
         }
 
@@ -96,5 +106,13 @@ public class CellworldFeatures {
 
     private static List<PlacementModifier> rareSurface(int chance, PlacementModifier heightmapPlacement) {
         return List.of(RarityFilter.onAverageOnceEvery(chance), InSquarePlacement.spread(), heightmapPlacement, BiomeFilter.biome());
+    }
+
+    private static List<PlacementModifier> commonOre(int count, PlacementModifier heightRange) {
+        return orePlacement(CountPlacement.of(count), heightRange);
+    }
+
+    private static List<PlacementModifier> orePlacement(PlacementModifier countPlacement, PlacementModifier heightRange) {
+        return List.of(countPlacement, InSquarePlacement.spread(), heightRange, BiomeFilter.biome());
     }
 }

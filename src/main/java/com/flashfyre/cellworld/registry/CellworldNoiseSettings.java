@@ -26,24 +26,8 @@ public class CellworldNoiseSettings extends NoiseRouterData {
 
     public static void cellworldBootstrap(BootstrapContext<NoiseGeneratorSettings> ctx) {
         ctx.register(END_CELLULAR, cellularEnd(ctx));
+        ctx.register(NETHER_CELLULAR, cellularNether(ctx));
     }
-
-    /*public static NoiseGeneratorSettings flatNether(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        return new NoiseGeneratorSettings(
-                NoiseSettings.create(0, 128, 1, 2),
-                Blocks.NETHERRACK.defaultBlockState(),
-                Blocks.LAVA.defaultBlockState(),
-                //NoiseRouterData.nether(context.lookup(Registries.DENSITY_FUNCTION), context.lookup(Registries.NOISE)),
-                CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
-                CellworldSurfaceRules.nether(ctx),
-                List.of(),
-                32,
-                false,
-                false,
-                false,
-                true
-        );
-    }*/
 
     public static NoiseGeneratorSettings cellularEnd(BootstrapContext<NoiseGeneratorSettings> ctx) {
         return new NoiseGeneratorSettings(
@@ -57,24 +41,6 @@ public class CellworldNoiseSettings extends NoiseRouterData {
                 List.of(),
                 0,
                 true,
-                false,
-                false,
-                true
-        );
-    }
-
-    public static NoiseGeneratorSettings flatEnd(BootstrapContext<NoiseGeneratorSettings> ctx) {
-        return new NoiseGeneratorSettings(
-                NoiseSettings.create(0, 128, 1, 2),
-                Blocks.END_STONE.defaultBlockState(),
-                Blocks.LAVA.defaultBlockState(),
-                //nether(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
-                end(ctx.lookup(Registries.DENSITY_FUNCTION)),
-                //CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
-                CellworldSurfaceRules.end(ctx),
-                List.of(),
-                32,
-                false,
                 false,
                 false,
                 true
@@ -99,13 +65,12 @@ public class CellworldNoiseSettings extends NoiseRouterData {
         );
     }
 
-    /*public static NoiseGeneratorSettings cellNether(BootstrapContext<NoiseGeneratorSettings> ctx) {
+    public static NoiseGeneratorSettings cellularNether(BootstrapContext<NoiseGeneratorSettings> ctx) {
         return new NoiseGeneratorSettings(
                 NoiseSettings.create(0, 128, 1, 2),
                 Blocks.NETHERRACK.defaultBlockState(),
                 Blocks.LAVA.defaultBlockState(),
                 NoiseRouterData.nether(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
-                //CellworldNoiseRouting.flat(ctx.lookup(Registries.DENSITY_FUNCTION), ctx.lookup(Registries.NOISE)),
                 CellworldSurfaceRules.nether(ctx),
                 List.of(),
                 32,
@@ -114,7 +79,7 @@ public class CellworldNoiseSettings extends NoiseRouterData {
                 false,
                 true
         );
-    }*/
+    }
 
 
 

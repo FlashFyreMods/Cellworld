@@ -8,7 +8,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -17,21 +16,21 @@ public class CellTreeElement {
     /*public static final Codec<CellEntry> CODEC = Codec.recursive(
             CellEntry.class.getSimpleName(), // This is for the toString method
             recursedCodec -> RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.either(Cell.CODEC, Codec.list(recursedCodec)).fieldOf("value").forGetter(CellEntry::value)
+                    Codec.either(Cell.CODEC, Codec.list(recursedCodec)).fieldOf("weight").forGetter(CellEntry::weight)
             ).apply(instance, CellEntry::new))
     );*/
 
-    private Either<Holder<Cell>, Either<CellSelector, Pair<Integer, String>>> value;
+    private Either<Holder<SurfacedBiome>, Either<CellSelector, Pair<Integer, String>>> value;
 
-    private CellTreeElement(Either<Holder<Cell>, Either<CellSelector, Pair<Integer, String>>> value) {
+    private CellTreeElement(Either<Holder<SurfacedBiome>, Either<CellSelector, Pair<Integer, String>>> value) {
         this.value = value;
     }
 
-    public static CellTreeElement cell(Holder<Cell> cell) {
+    public static CellTreeElement cell(Holder<SurfacedBiome> cell) {
         return new CellTreeElement(Either.left(cell));
     }
 
-    public static CellTreeElement cell(HolderGetter<Cell> cells, ResourceKey<Cell> cellKey) {
+    public static CellTreeElement cell(HolderGetter<SurfacedBiome> cells, ResourceKey<SurfacedBiome> cellKey) {
         return cell(cells.getOrThrow(cellKey));
     }
 
@@ -43,7 +42,7 @@ public class CellTreeElement {
         return new CellTreeElement(Either.right(Either.right(new Pair<>(0, id))));
     }
 
-    public Stream<Holder<Cell>> stream() {
+    public Stream<Holder<SurfacedBiome>> stream() {
         if (this.getCell().isPresent()) {
             return Stream.of(this.getCell().orElseThrow());
         }
@@ -54,7 +53,7 @@ public class CellTreeElement {
         }
     }
 
-    public Optional<Holder<Cell>> getCell() {
+    public Optional<Holder<SurfacedBiome>> getCell() {
         return this.value.left();
     }
 
@@ -71,7 +70,7 @@ public class CellTreeElement {
     }
 
     public static final MapCodec<CellTreeElement> CODEC = Codec.mapEither(
-            Cell.CODEC.fieldOf("cell"),
+            SurfacedBiome.CODEC.fieldOf("cell"),
             Codec.mapEither(
                     CellSelector.CODEC.fieldOf("cell_selector"),
                     Codec.mapPair(

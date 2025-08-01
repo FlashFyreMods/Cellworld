@@ -137,7 +137,7 @@
     "type": "minecraft:sequence",
     "sequence": [
       {
-        "type": "cellworld:cell_map",
+        "type": "cellworld:cell_selection_tree",
         "cell_selection_tree": "cellworld:end"
       },
       {

@@ -1,9 +1,10 @@
 package com.flashfyre.cellworld.cells.selector;
 
 import com.flashfyre.cellworld.Cellworld;
-import com.flashfyre.cellworld.cells.Cell;
+import com.flashfyre.cellworld.cells.SurfacedBiome;
+import com.flashfyre.cellworld.cells.CellSelectionTree;
 import com.flashfyre.cellworld.cells.CellTreeElement;
-import com.flashfyre.cellworld.cells.SingleIntConfiguredCell;
+import com.flashfyre.cellworld.cells.WeightedSurfacedBiome;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -13,7 +14,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.util.random.SimpleWeightedRandomList;
-import net.minecraft.util.random.WeightedEntry;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -21,31 +21,31 @@ import java.util.stream.Stream;
 public class WeightedRandomSelector implements CellSelector {
     public static final MapCodec<WeightedRandomSelector> CODEC = RecordCodecBuilder.mapCodec(
             inst -> inst.group(Codec.either(
-                        RegistryCodecs.homogeneousList(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL),
+                        RegistryCodecs.homogeneousList(CellworldRegistries.WEIGHTED_SURFACED_BIOME_REG_KEY),
                         SimpleWeightedRandomList.wrappedCodec(CellTreeElement.CODEC.codec())
-                    ).fieldOf("cellSelector").forGetter(e -> e.cells)
+                    ).fieldOf("entries").forGetter(e -> e.entries)
     ).apply(inst, WeightedRandomSelector::new));
 
-    private final Either<HolderSet<SingleIntConfiguredCell>, SimpleWeightedRandomList<CellTreeElement>> cells;
-    private SimpleWeightedRandomList<Holder<Cell>> list;
+    private final Either<HolderSet<WeightedSurfacedBiome>, SimpleWeightedRandomList<CellTreeElement>> entries;
+    private SimpleWeightedRandomList<Holder<SurfacedBiome>> list;
 
-    public WeightedRandomSelector(Either<HolderSet<SingleIntConfiguredCell>, SimpleWeightedRandomList<CellTreeElement>> cells) {
-        this.cells = cells;
+    private WeightedRandomSelector(Either<HolderSet<WeightedSurfacedBiome>, SimpleWeightedRandomList<CellTreeElement>> entries) {
+        this.entries = entries;
     }
 
-    public WeightedRandomSelector(HolderSet<SingleIntConfiguredCell> cells) {
-        this(Either.left(cells));
+    public static WeightedRandomSelector holderSet(HolderSet<WeightedSurfacedBiome> holderSet) {
+        return new WeightedRandomSelector(Either.left(holderSet));
     }
 
-    public WeightedRandomSelector(SimpleWeightedRandomList<CellTreeElement> cells) {
-        this(Either.right(cells));
+    public static WeightedRandomSelector weightedList(SimpleWeightedRandomList<CellTreeElement> weightedList) {
+        return new WeightedRandomSelector(Either.right(weightedList));
     }
 
     @Override
-    public CellTreeElement get(LevelParameter.CellContext ctx) {
-        return this.cells.left().isPresent() ?
+    public CellTreeElement get(CellSelectionTree.PositionalContext ctx) {
+        return this.entries.left().isPresent() ?
                 CellTreeElement.cell(this.list.getRandomValue(ctx.rand()).orElseThrow())
-                : this.cells.right().orElseThrow().getRandomValue(ctx.rand()).orElseThrow();
+                : this.entries.right().orElseThrow().getRandomValue(ctx.rand()).orElseThrow();
     }
 
     @Override
@@ -53,29 +53,29 @@ public class WeightedRandomSelector implements CellSelector {
         return Cellworld.WEIGHTED_RANDOM.get();
     }
 
-    public Stream<Holder<Cell>> streamCells() {
+    public Stream<Holder<SurfacedBiome>> streamCells() {
         this.buildList();
-        if(this.cells.left().isPresent()) {
-            return this.cells.left().orElseThrow().stream().map(e -> e.value().cell());
+        if(this.entries.left().isPresent()) {
+            return this.entries.left().orElseThrow().stream().map(e -> e.value().cell());
         } else {
-            return this.cells.right().orElseThrow().unwrap().stream().flatMap(w -> w.data().stream());
+            return this.entries.right().orElseThrow().unwrap().stream().flatMap(w -> w.data().stream());
         }
     }
 
     @Override
     public List<CellTreeElement> elements() {
-        if(this.cells.left().isPresent()) {
+        if(this.entries.left().isPresent()) {
             return List.of();
         } else {
-            return this.cells.right().orElseThrow().unwrap().stream().map(e -> e.data()).toList();
+            return this.entries.right().orElseThrow().unwrap().stream().map(e -> e.data()).toList();
         }
     }
 
     public void buildList() {
-        if(this.cells.left().isPresent()) {
-            SimpleWeightedRandomList.Builder<Holder<Cell>> builder = new SimpleWeightedRandomList.Builder<>();
-            this.cells.left().orElseThrow().forEach(h -> {
-                builder.add(h.value().cell(), h.value().value());
+        if(this.entries.left().isPresent()) {
+            SimpleWeightedRandomList.Builder<Holder<SurfacedBiome>> builder = new SimpleWeightedRandomList.Builder<>();
+            this.entries.left().orElseThrow().forEach(h -> {
+                builder.add(h.value().cell(), h.value().weight());
             });
             this.list = builder.build();
         }

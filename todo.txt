@@ -1,7 +1,8 @@
 - Finish amethyst fields
+- Finish gilded depths
 
 - Make nether
-- Finish gilded depths
+
 - Consider expanding weighted
 
 

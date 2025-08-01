@@ -1,14 +1,14 @@
 package com.flashfyre.cellworld.cells;
 
+import com.flashfyre.cellworld.CellUtil;
 import com.flashfyre.cellworld.Cellworld;
 import com.flashfyre.cellworld.CellworldNoiseWiringHelper;
 import com.flashfyre.cellworld.cells.selector.CellSelector;
-import com.flashfyre.cellworld.cells.selector.LevelParameter;
-import com.flashfyre.cellworld.cells.selector.LevelParameterValueSelector;
+import com.flashfyre.cellworld.cells.selector.FunctionValueSelector;
 import com.flashfyre.cellworld.cells.selector.RandomSelector;
-import com.flashfyre.cellworld.levelgen.SeededEndIslandDensityFunction;
+import com.flashfyre.cellworld.cells.selector.WeightedRandomSelector;
 import com.flashfyre.cellworld.levelgen.densityfunction.DistToXZCoordFunction;
-import com.flashfyre.cellworld.registry.CellworldCells;
+import com.flashfyre.cellworld.registry.CellworldSurfacedBiomes;
 import com.flashfyre.cellworld.registry.CellworldRegistries;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -21,15 +21,28 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.levelgen.*;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSelector> initialLayer, Optional<Map<String, Pair<Integer, CellTreeElement>>> layers) {
+public class CellSelectionTree {
+
+    private final List<Integer> layerScales;
+    private final Pair<Integer, CellSelector> initialLayer;
+    private final Optional<Map<String, Pair<Integer, CellTreeElement>>> layers;
+    private long seed = 0;
+
+    public CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSelector> initialLayer, Optional<Map<String, Pair<Integer, CellTreeElement>>> layers) {
+        this.layerScales = layerScales;
+        this.initialLayer = initialLayer;
+        this.layers = layers;
+    }
 
     public CellSelectionTree(int scale, CellSelector selector) {
         this(List.of(scale), new Pair<>(0, selector), Optional.empty());
@@ -39,18 +52,21 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSel
         this(layerScales, new Pair<>(intialLayerIndex, initialLayer), Optional.of(layers));
     }
 
+    public CellSelectionTree(List<Integer> layerScales, int intialLayerIndex, CellSelector initialLayer) {
+        this(layerScales, new Pair<>(intialLayerIndex, initialLayer), Optional.empty());
+    }
+
     public static final Codec<CellSelectionTree> DIRECT_CODEC = RecordCodecBuilder.create(
             inst -> inst.group(
-                    ExtraCodecs.POSITIVE_INT.listOf().fieldOf("layer_scales").forGetter(CellSelectionTree::layerScales),
-                    Codec.mapPair(Codec.INT.fieldOf("scale_index"), CellSelector.CODEC.fieldOf("selector")).codec().fieldOf("first_layer").forGetter(tree -> tree.initialLayer),
-                    Codec.unboundedMap(Codec.string(1, 32), Codec.mapPair(Codec.INT.fieldOf("scale_index"), CellTreeElement.CODEC.codec().fieldOf("element")).codec()).optionalFieldOf("layers").forGetter(CellSelectionTree::layers)
-                    //Codec.mapPair(Codec.INT.fieldOf("scale_index"), Codec.unboundedMap(Codec.string(1, 32), CellTreeElement.CODEC.codec()).fieldOf("element")).codec().listOf().optionalFieldOf("layers").forGetter(cellMap -> cellMap.layers)
+                    ExtraCodecs.POSITIVE_INT.listOf().fieldOf("layer_scales").forGetter(t -> t.layerScales),
+                    Codec.mapPair(Codec.INT.fieldOf("scale_index"), CellSelector.CODEC.fieldOf("selector")).codec().fieldOf("first_layer").forGetter(t -> t.initialLayer),
+                    Codec.unboundedMap(Codec.string(1, 32), Codec.mapPair(Codec.INT.fieldOf("scale_index"), CellTreeElement.CODEC.codec().fieldOf("element")).codec()).optionalFieldOf("layers").forGetter(t -> t.layers)
             ).apply(inst, CellSelectionTree::new)
     );
 
-    public static final Codec<Holder<CellSelectionTree>> CODEC = RegistryFileCodec.create(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY, DIRECT_CODEC);
+    public static final Codec<Holder<CellSelectionTree>> CODEC = RegistryFileCodec.create(CellworldRegistries.CELL_SELECTION_TREE_REG_KEY, DIRECT_CODEC);
 
-    public Cell getCell(int x, int z) {
+    public SurfacedBiome getCell(int x, int z) {
 
         /*NormalNoise shift = NormalNoise.create(new WorldgenRandom(new LegacyRandomSource(0)), -5, 1.0, 0.5);
         int multiplier = 15;
@@ -65,33 +81,33 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSel
 
     /**
      * This method exists to be called by BiomeSource#collectPossibleBiomes
-     * so that all biomes within cells can be collected
+     * so that all biomes within entries can be collected
      *
-     * @returns A stream of all cells used in the tree
+     * @returns A stream of all entries used in the tree
      */
-    public Stream<Holder<Cell>> streamCells() {
-        Stream<Holder<Cell>> base = this.initialLayer.getSecond().streamCells();
+    public Stream<Holder<SurfacedBiome>> streamCells() {
+        Stream<Holder<SurfacedBiome>> base = this.initialLayer.getSecond().streamCells();
         if(this.layers.isEmpty()) {
             return base;
         }
 
-        Stream<Holder<Cell>> layered = this.layers.orElseThrow().values().stream().flatMap(p -> p.getSecond().stream());
+        Stream<Holder<SurfacedBiome>> layered = this.layers.orElseThrow().values().stream().flatMap(p -> p.getSecond().stream());
 
         return Stream.concat(base, layered);
     }
 
-    private Cell resolveCell(CellSelector selector, int x, int z) {
+
+
+    private SurfacedBiome resolveCell(CellSelector selector, int x, int z) {
         List<BlockPos> nucleiiPositions = new ArrayList<>();
         BlockPos nucleusPos = new BlockPos(x, 0, z);
         BlockPos originalBlockPos = new BlockPos(x, 0, z);
-        if(this.layers.isPresent()) {
-            for(int i = this.layerScales.size()-1; i>=0; i--) { // Iterate from smallest to largest
-                nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.get(i));
-                nucleiiPositions.add(nucleusPos);
-            }
+        for(int i = this.layerScales.size()-1; i>=0; i--) { // Iterate from smallest to largest
+            nucleusPos = CellUtil.getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.get(i), this.seed);
+            nucleiiPositions.add(nucleusPos);
         }
 
-        nucleusPos = getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.getFirst());
+        nucleusPos = CellUtil.getClosestNucleus(nucleusPos.getX(), nucleusPos.getZ(), this.layerScales.getFirst(), this.seed);
         nucleiiPositions.add(nucleusPos); // Now we have a nucleii position for each cell size, to get cell info
         nucleiiPositions = nucleiiPositions.reversed(); //now list is from largest to smallest
 
@@ -103,7 +119,7 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSel
 
         RandomSource r = new LegacyRandomSource(0);
         r.setSeed(BlockPos.asLong(seedPos.getX(), 0, seedPos.getZ()));
-        LevelParameter.CellContext ctx = new LevelParameter.CellContext(r, seedPos.getX(), 0, seedPos.getZ());
+        PositionalContext ctx = new PositionalContext(r, seedPos.getX(), 0, seedPos.getZ());
 
         CellTreeElement currentElement = selector.get(ctx);
         while (currentElement.getSelectorOrSubtreeKey().isPresent()) { // If the node is a branch
@@ -118,13 +134,14 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSel
 
                 seedPos = layerIndex < 0 ? originalBlockPos : nucleiiPositions.get(layerIndex); // Update the nucleus pos that we are now at, to the one sampled earlier
                 r.setSeed(BlockPos.asLong(seedPos.getX(), 0, seedPos.getZ()));
-                ctx = new LevelParameter.CellContext(r, seedPos.getX(), 0, seedPos.getZ()); // Update the context
+                ctx = new PositionalContext(r, seedPos.getX(), 0, seedPos.getZ()); // Update the context
             }
         }
         return currentElement.getCell().orElseThrow().value();
     }
 
-    public void initSeeds(CellworldNoiseWiringHelper noiseWirer) {
+    public void initSeeds(CellworldNoiseWiringHelper noiseWirer, long seed) {
+        this.seed = seed;
         CellTreeElement initialLayerElement = CellTreeElement.selector(this.initialLayer.getSecond());
         initSeeds(initialLayerElement, noiseWirer);
         if(this.layers.isPresent()) {
@@ -138,7 +155,7 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSel
     private void initSeeds(CellTreeElement element, CellworldNoiseWiringHelper noiseWirer) {
         if(element.getSelector().isPresent()) {
             CellSelector selector = element.getSelector().orElseThrow();
-            if(selector instanceof LevelParameterValueSelector valueSelector) {
+            if(selector instanceof FunctionValueSelector valueSelector) {
                 valueSelector.wireNoise(noiseWirer);
             }
             for (CellTreeElement e : selector.elements()) {
@@ -147,77 +164,55 @@ public record CellSelectionTree(List<Integer> layerScales, Pair<Integer, CellSel
         }
     }
 
-    private static BlockPos getClosestNucleus(int blockX, int blockZ, int cellSize) {
-        // We need to get the corner of the current square cell that we are in
-        int cellX = Math.floorDiv(blockX, cellSize);
-        int cellZ = Math.floorDiv(blockZ, cellSize);
-        Random r = new Random();
-        XoroshiroRandomSource rand = new XoroshiroRandomSource(0);
-        PositionalRandomFactory factory = rand.forkPositional();
-        double distToClosestCellCentre = Double.MAX_VALUE;
-        BlockPos.MutableBlockPos closestCellCentrePos = new BlockPos.MutableBlockPos();
-        // We need to check the distances to adjacent cellSelector as well as our current cell
-        for (int currentCellX = cellX - 1; currentCellX <= cellX + 1; currentCellX++) {
-            for (int currentCellZ = cellZ - 1; currentCellZ <= cellZ + 1; currentCellZ++) {
-                // Seed the rng using the blockpos of the cell being checked currently - this ensures the random centre is always calculated the same.
-                r.setSeed(BlockPos.asLong((currentCellX * cellSize), 0, (currentCellZ * cellSize)));
-                RandomSource randomSource = factory.at(currentCellX * cellSize, 0, currentCellZ * cellSize);
-                int cellCentreOffsetX = randomSource.nextInt(cellSize);
-                int cellCentreOffsetZ = randomSource.nextInt(cellSize);
-                // We need to convert the cell centre to a world coordinate
-                int xCentreWorld = currentCellX * cellSize + cellCentreOffsetX;
-                int zCentreWorld = currentCellZ * cellSize + cellCentreOffsetZ;
 
-                // Get the distance from the current block to the cell centre currently being checked in the loop
-                double dist = Mth.square(blockX - xCentreWorld) + Mth.square(blockZ - zCentreWorld);
 
-                // Compare with existing distances - overwrite if the current centre is closer
-                if(dist < distToClosestCellCentre) {
-                    distToClosestCellCentre = dist;
-                    closestCellCentrePos.set(xCentreWorld, 0, zCentreWorld);
-                }
-            }
-        }
-        return closestCellCentrePos.immutable();
-    }
+
 
     public static final ResourceKey<CellSelectionTree> END = createKey("end");
+    public static final ResourceKey<CellSelectionTree> NETHER = createKey("nether");
 
     public static void bootstrap(BootstrapContext<CellSelectionTree> ctx) {
-        HolderGetter<SingleIntConfiguredCell> weightedCellEntries = ctx.lookup(CellworldRegistries.SINGLE_INT_CONFIGURED_CELL);
-        HolderGetter<Cell> cells = ctx.lookup(CellworldRegistries.CELL_REGISTRY_KEY);
+        HolderGetter<WeightedSurfacedBiome> weightedSurfacedBiomes = ctx.lookup(CellworldRegistries.WEIGHTED_SURFACED_BIOME_REG_KEY);
+        HolderGetter<SurfacedBiome> surfacedBiomes = ctx.lookup(CellworldRegistries.SURFACED_BIOME_REG_KEY);
         /*ctx.register(END, new CellSelectionTree(List.of(360, 180, 90, 45, 22, 11), new Pair<>(0, new LevelParameterValueSelector(
                 new LevelParameter.DistFromXZCoord(0, 0),
                 List.of(
-                        new Pair<>(900f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.THE_END))),
-                        new Pair<>(1000f, CellTreeElement.cell(cells.getOrThrow(CellworldCells.SMALL_END_ISLANDS)))
+                        new Pair<>(900f, CellTreeElement.cell(entries.getOrThrow(CellworldCells.THE_END))),
+                        new Pair<>(1000f, CellTreeElement.cell(entries.getOrThrow(CellworldCells.SMALL_END_ISLANDS)))
                 ),
                 CellTreeElement.selector(new RandomSelector(List.of(
-                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.END_HIGHLANDS)),
-                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
-                        CellTreeElement.cell(cells.getOrThrow(CellworldCells.AMETHYST_FIELDS)))))
+                        CellTreeElement.cell(entries.getOrThrow(CellworldCells.END_HIGHLANDS)),
+                        CellTreeElement.cell(entries.getOrThrow(CellworldCells.OBSIDIAN_SPIRES)),
+                        CellTreeElement.cell(entries.getOrThrow(CellworldCells.AMETHYST_FIELDS)))))
         )), Optional.empty()));*/
 
         ctx.register(END, new CellSelectionTree(
                 List.of(360, 180, 90, 45, 22, 11),
-                -1, new LevelParameterValueSelector(
+                -1, new FunctionValueSelector(
                         DistToXZCoordFunction.zero(),
-                        CellTreeElement.cell(cells, CellworldCells.THE_END), 850f,
-                        CellTreeElement.selector(new LevelParameterValueSelector(
+                        CellTreeElement.cell(surfacedBiomes, CellworldSurfacedBiomes.THE_END), 850f,
+                        CellTreeElement.selector(new FunctionValueSelector(
                             DensityFunctions.flatCache(DensityFunctions.endIslands(0)),
-                            CellTreeElement.cell(cells, CellworldCells.SMALL_END_ISLANDS), -0.3f,
+                            CellTreeElement.cell(surfacedBiomes, CellworldSurfacedBiomes.SMALL_END_ISLANDS), -0.3f,
                             CellTreeElement.subtree("land_biomes")
-        ))), Map.of("land_biomes", new Pair<>(0, CellTreeElement.selector(new LevelParameterValueSelector(
+        ))), Map.of("land_biomes", new Pair<>(0, CellTreeElement.selector(new FunctionValueSelector(
                 DistToXZCoordFunction.zero(),
-                CellTreeElement.cell(cells, CellworldCells.END_HIGHLANDS), 1500f,
-                CellTreeElement.selector(new RandomSelector(cells.getOrThrow(Cell.OUTER_END))))
+                CellTreeElement.cell(surfacedBiomes, CellworldSurfacedBiomes.END_HIGHLANDS), 1500f,
+                CellTreeElement.selector(WeightedRandomSelector.holderSet((weightedSurfacedBiomes.getOrThrow(WeightedSurfacedBiome.OUTER_END))))
                 ))
-        )));
+        ))));
+
+        ctx.register(NETHER, new CellSelectionTree(
+                List.of(240, 120, 60, 30, 15, 7),
+                0, WeightedRandomSelector.holderSet(weightedSurfacedBiomes.getOrThrow(WeightedSurfacedBiome.NETHER))
+        ));
 
     }
 
 
     private static ResourceKey<CellSelectionTree> createKey(String name) {
-        return ResourceKey.create(CellworldRegistries.CELL_SELECTION_TREE_REGISTRY_KEY, ResourceLocation.fromNamespaceAndPath(Cellworld.MOD_ID, name));
+        return ResourceKey.create(CellworldRegistries.CELL_SELECTION_TREE_REG_KEY, ResourceLocation.fromNamespaceAndPath(Cellworld.MOD_ID, name));
     }
+
+    public record PositionalContext(RandomSource rand, int nucleusBlockX, int nucleusBlockY, int nucleusBlockZ) { }
 }

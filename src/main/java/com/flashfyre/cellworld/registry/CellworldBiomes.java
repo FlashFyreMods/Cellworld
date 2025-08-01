@@ -39,7 +39,7 @@ public class CellworldBiomes {
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, configuredCarvers);
         ctx.register(GILDED_DEPTHS, gildedDepths(placedFeatures, configuredCarvers));
         ctx.register(OBSIDIAN_SPIRES, obsidianSpires(placedFeatures, configuredCarvers));
-        ctx.register(AMETHYST_FIELDS, baseEndBiome(builder));
+        ctx.register(AMETHYST_FIELDS, amethystFields(placedFeatures, configuredCarvers));
     }
 
     public static Biome gildedDepths(HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
@@ -56,8 +56,8 @@ public class CellworldBiomes {
         builder.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, NetherPlacements.SPRING_OPEN)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, NetherPlacements.PATCH_FIRE)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, NetherPlacements.PATCH_SOUL_FIRE)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VegetationPlacements.BROWN_MUSHROOM_NETHER)
-                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, VegetationPlacements.RED_MUSHROOM_NETHER)
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, CellworldFeatures.Placed.GILDED_BLACKSTONE_ORE)
+                .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, CellworldFeatures.Placed.RAW_GOLD_ORE)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, OrePlacements.ORE_MAGMA)
                 .addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, NetherPlacements.SPRING_CLOSED);
         BiomeDefaultFeatures.addNetherDefaultOres(builder);
@@ -85,6 +85,13 @@ public class CellworldBiomes {
     private static Biome obsidianSpires(HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
         BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
                 .addFeature(GenerationStep.Decoration.RAW_GENERATION, CellworldFeatures.Placed.OBSIDIAN_SPIRE)
+                .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CellworldFeatures.Placed.CHORUS_PLANT_SPARSE);
+        return baseEndBiome(builder);
+    }
+
+    private static Biome amethystFields(HolderGetter<PlacedFeature> placedFeatures, HolderGetter<ConfiguredWorldCarver<?>> worldCarvers) {
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder(placedFeatures, worldCarvers)
+                .addFeature(GenerationStep.Decoration.RAW_GENERATION, CellworldFeatures.Placed.AMETHYST_CLUSTER)
                 .addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, CellworldFeatures.Placed.CHORUS_PLANT_SPARSE);
         return baseEndBiome(builder);
     }
